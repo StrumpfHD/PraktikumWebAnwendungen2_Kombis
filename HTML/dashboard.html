@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <script src="js/bootstrap.bundle.min.js"></script>
 </head>
 
@@ -23,26 +25,211 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Räume</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Geräte</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Statistik</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Einstellungen</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link active" href="#">Räume</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Geräte</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Statistik</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Einstellungen</a></li>
                 </ul>
             </div>
         </div>
     </nav>
+
     <div class="container">
-        <h1>Hello World!</h1>
-        <button type="button" class="btn btn-danger">Danger!</button>
+        <h1>Hello World!</h1> <button type="button" class="btn btn-danger"
+            onclick="alert('Danger wurde ausgelöst');">Danger!</button>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row g-4">
+
+            <!-- Karte 1: Wohnzimmer -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">Wohnzimmer</h3>
+
+                        <h6 class="card-text mt-3"><u>Rollladensteuerung:</u></h6>
+                        <label for="customRange1" class="form-label">Rollladen Wohnzimmer Süd</label>
+                        <input type="range" class="form-range" id="customRange1">
+                        <label for="customRange2" class="form-label">Rollladen Wohnzimmer Nord</label>
+                        <input type="range" class="form-range" id="customRange2">
+
+                        <h6 class="card-text mt-3"><u>Heizungssteuerung:</u></h6>
+                        <div class="d-flex justify-content-center align-items-center mb-3">
+                            <button type="button" class="btn" id="minusbtn"><i class="bi bi-dash-circle"></i></button>
+                            <h2 id="temperature" class="mb-0 mx-2">22.5°C</h2>
+                            <button type="button" class="btn" id="plusbtn"><i class="bi bi-plus-circle"></i></button>
+                        </div>
+
+                        <h6 class="card-text mt-3"><u>Steckdosensteuerung:</u></h6>
+                        <div class="switches">
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                <label class="form-check-label" for="switchTV">Steckdose TV</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="text small mx-5">Off</span>
+                                    <input class="form-check-input" type="checkbox" id="switchTV" checked>
+                                    <span class="text small mx-2">On</span>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                <label class="form-check-label" for="switchSofa">Sofa-Ladeleiste</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="text small mx-5">Off</span>
+                                    <input class="form-check-input" type="checkbox" id="switchSofa">
+                                    <span class="text small mx-2">On</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="card-text mt-3"><u>Lichtsteuerung:</u></h6>
+                        <div class="switches">
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                <label class="form-check-label" for="switchAmbient">Ambientebeleuchtung</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="text small mx-5">Off</span>
+                                    <input class="form-check-input" type="checkbox" id="switchAmbient" checked>
+                                    <span class="text small mx-2">On</span>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                <label class="form-check-label" for="switchDeckeWohnzimmer">Deckenleuchten</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="text small mx-5">Off</span>
+                                    <input class="form-check-input" type="checkbox" id="switchDeckeWohnzimmer">
+                                    <span class="text small mx-2">On</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-primary">Zum Wohnzimmer</a>
+                </div>
+            </div>
+
+            <!-- Karte 2: Küche -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">Küche</h3>
+
+                        <h6 class="card-text mt-3"><u>Rollladensteuerung:</u></h6>
+                        <label for="customRange3" class="form-label">Rollladen Küche Nord</label>
+                        <input type="range" class="form-range" id="customRange3">
+                        <label for="customRange4" class="form-label">Rollladen Küche West</label>
+                        <input type="range" class="form-range" id="customRange4">
+
+                        <h6 class="card-text mt-3"><u>Heizungssteuerung:</u></h6>
+                        <div class="d-flex justify-content-center align-items-center mb-3">
+                            <button type="button" class="btn" id="minusbtn2"><i class="bi bi-dash-circle"></i></button>
+                            <h2 id="temperature2" class="mb-0 mx-2">20.7°C</h2>
+                            <button type="button" class="btn" id="plusbtn2"><i class="bi bi-plus-circle"></i></button>
+                        </div>
+
+                        <h6 class="card-text mt-3"><u>Steckdosensteuerung:</u></h6>
+                        <div class="switches">
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                <label class="form-check-label" for="switchThermomix">Steckdose Thermomix</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="text small mx-5">Off</span>
+                                    <input class="form-check-input" type="checkbox" id="switchThermomix">
+                                    <span class="text small mx-2">On</span>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                <label class="form-check-label" for="switchKaffee">Steckdose Kaffeemaschine</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="text small mx-5">Off</span>
+                                    <input class="form-check-input" type="checkbox" id="switchKaffee" checked>
+                                    <span class="text small mx-2">On</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="card-text mt-3"><u>Lichtsteuerung:</u></h6>
+                        <div class="switches">
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                <label class="form-check-label" for="switchEsstisch">Licht Esstisch</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="text small mx-5">Off</span>
+                                    <input class="form-check-input" type="checkbox" id="switchEsstisch" checked>
+                                    <span class="text small mx-2">On</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-primary">Zur Küche</a>
+                </div>
+            </div>
+
+            <!-- Karte 3: Badezimmer -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">Badezimmer</h3>
+
+                        <h6 class="card-text mt-3"><u>Rollladensteuerung:</u></h6>
+                        <label for="customRange5" class="form-label">Rollladen Badezimmer West</label>
+                        <input type="range" class="form-range" id="customRange5">
+                        <label for="customRange6" class="form-label">Rollladen Badezimmer Ost</label>
+                        <input type="range" class="form-range" id="customRange6">
+
+                        <h6 class="card-text mt-3"><u>Heizungssteuerung:</u></h6>
+                        <div class="d-flex justify-content-center align-items-center mb-3">
+                            <button type="button" class="btn" id="minusbtn3"><i class="bi bi-dash-circle"></i></button>
+                            <h2 id="temperature3" class="mb-0 mx-2">21.4°C</h2>
+                            <button type="button" class="btn" id="plusbtn3"><i class="bi bi-plus-circle"></i></button>
+                        </div>
+
+                        <h6 class="card-text mt-3"><u>Steckdosensteuerung:</u></h6>
+                        <div class="switches">
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                <label class="form-check-label" for="switchZahnbuerste">Steckdose
+                                    Zahnbürste</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="text small mx-5">Off</span>
+                                    <input class="form-check-input" type="checkbox" id="switchZahnbuerste">
+                                    <span class="text small mx-2">On</span>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                <label class="form-check-label" for="switchWaschmaschine">Steckdose
+                                    Waschmaschine</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="text small mx-5">Off</span>
+                                    <input class="form-check-input" type="checkbox" id="switchWaschmaschine" checked>
+                                    <span class="text small mx-2">On</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="card-text mt-3"><u>Lichtsteuerung:</u></h6>
+                        <div class="switches">
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                <label class="form-check-label" for="switchSpiegel">Schminkspiegel</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="text small mx-5">Off</span>
+                                    <input class="form-check-input" type="checkbox" id="switchSpiegel">
+                                    <span class="text small mx-2">On</span>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                <label class="form-check-label" for="switchDeckeBad">Deckenleuchten</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="text small mx-5">Off</span>
+                                    <input class="form-check-input" type="checkbox" id="switchDeckeBad">
+                                    <span class="text small mx-2">On</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-primary">Zum Badezimmer</a>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 
