@@ -3,6 +3,6 @@ git pull
 
 Änderungen hoch ballern:
 git pull
-git add -a
+git add -A
 git commit -m "Nachricht"
 git push
