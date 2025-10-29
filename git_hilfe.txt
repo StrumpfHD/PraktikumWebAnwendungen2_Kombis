@@ -1,0 +1,8 @@
+Vor beginn:
+git pull
+
+Änderungen hoch ballern:
+git pull
+git add -a
+git commit -m "Nachricht"
+git push
