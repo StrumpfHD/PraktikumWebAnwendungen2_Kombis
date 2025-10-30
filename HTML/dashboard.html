@@ -37,8 +37,8 @@
     </nav>
 
     <div class="container">
-        <h1>Hello World!</h1> <button type="button" class="btn btn-danger"
-            onclick="alert('Danger wurde ausgelöst');">Danger!</button>
+        <h1>Hallo Benutzer!</h1> <button type="button" class="btn btn-danger"
+            onclick="alert('Alarm wurde gedrückt! ALAAAAAAAARM!');">Alarm auslösen!</button>
     </div>
 
     <div class="container mt-4">
@@ -48,64 +48,80 @@
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h3 class="card-title">Wohnzimmer</h3>
+                        <h3 class="card-title">Wohnzimmer (Status)</h3>
 
-                        <h6 class="card-text mt-3"><u>Rollladensteuerung:</u></h6>
-                        <label for="customRange1" class="form-label">Rollladen Wohnzimmer Süd</label>
-                        <input type="range" class="form-range" id="customRange1">
-                        <label for="customRange2" class="form-label">Rollladen Wohnzimmer Nord</label>
-                        <input type="range" class="form-range" id="customRange2">
-
-                        <h6 class="card-text mt-3"><u>Heizungssteuerung:</u></h6>
-                        <div class="d-flex justify-content-center align-items-center mb-3">
-                            <button type="button" class="btn" id="minusbtn"><i class="bi bi-dash-circle"></i></button>
-                            <h2 id="temperature" class="mb-0 mx-2">22.5°C</h2>
-                            <button type="button" class="btn" id="plusbtn"><i class="bi bi-plus-circle"></i></button>
-                        </div>
-
-                        <h6 class="card-text mt-3"><u>Steckdosensteuerung:</u></h6>
-                        <div class="switches">
-                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
-                                <label class="form-check-label" for="switchTV">Steckdose TV</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="text small mx-5">Off</span>
-                                    <input class="form-check-input" type="checkbox" id="switchTV" checked>
-                                    <span class="text small mx-2">On</span>
+                        <h6 class="card-text m-3 text-center"><u>Rollladen-Status:</u></h6>
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Wohnzimmer Süd</p>
+                                    <img class="img-fluid" src="./pictures/blinds_closed.png"
+                                        alt="Rollladen geschlossen" width="100px">
+                                    <h3>100%</h3>
                                 </div>
                             </div>
 
-                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
-                                <label class="form-check-label" for="switchSofa">Sofa-Ladeleiste</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="text small mx-5">Off</span>
-                                    <input class="form-check-input" type="checkbox" id="switchSofa">
-                                    <span class="text small mx-2">On</span>
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Wohnzimmer Nord</p>
+                                    <img class="img-fluid" src="./pictures/blinds_half.png" alt="Rollladen halb"
+                                        width="100px">
+                                    <h3>60%</h3>
                                 </div>
                             </div>
                         </div>
 
-                        <h6 class="card-text mt-3"><u>Lichtsteuerung:</u></h6>
-                        <div class="switches">
-                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
-                                <label class="form-check-label" for="switchAmbient">Ambientebeleuchtung</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="text small mx-5">Off</span>
-                                    <input class="form-check-input" type="checkbox" id="switchAmbient" checked>
-                                    <span class="text small mx-2">On</span>
+                        <h6 class="card-text m-3 text-center"><u>Aktuelle Temperatur:</u></h6>
+                        <div class="card">
+                            <div class="d-flex justify-content-center align-items-center m-1">
+                                <h2 id="temperature" class="mb-0 mx-2">22.5°C</h2>
+                            </div>
+                        </div>
+
+                        <h6 class="card-text m-3 text-center"><u>Steckdosen-Status:</u></h6>
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Steckdose Wohnzimmer</p>
+                                    <img class="img-fluid" src="./pictures/steckdose_off.png" alt="Steckdose aus"
+                                        width="70px">
+                                    <h3>Off</h3>
                                 </div>
                             </div>
 
-                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
-                                <label class="form-check-label" for="switchDeckeWohnzimmer">Deckenleuchten</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="text small mx-5">Off</span>
-                                    <input class="form-check-input" type="checkbox" id="switchDeckeWohnzimmer">
-                                    <span class="text small mx-2">On</span>
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Sofa-<br>Ladeleiste</p>
+                                    <img class="img-fluid" src="./pictures/steckdose_on.png" alt="Steckdose an"
+                                        width="70px">
+                                    <h3>On</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="card-text m-3 text-center"><u>Licht-Status:</u></h6>
+                        <div
+                            class="d-flex justify-content-center align-items-center align-items-stretch flex-wrap gap-3">
+                            <div class="card" style="width: 47%;">
+                                <div class="card-title text-center m-2">Ambientebeleuchtung</div>
+                                <div class="card-body text-center">
+                                    <img class="img-fluid" src="./pictures/lightbulb_on.png" alt="Steckdose aus"
+                                        width="70px">
+                                    <h3>On</h3>
+                                </div>
+                            </div>
+
+                            <div class="card" style="width: 47%;">
+                                <div class="card-titel text-center m-2">Deckenleuchten</div>
+                                <div class="card-body text-center">
+                                    <img class="img-fluid" src="./pictures/lightbulb_off.png" alt="Steckdose an"
+                                        width="70px">
+                                    <h3>Off</h3>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <a href="room_livingroom.html" class="btn btn-primary">Zum Wohnzimmer</a>
+                    <a href="room_livingroom.html" class="btn btn-primary">Anpassen</a>
                 </div>
             </div>
 
@@ -113,55 +129,72 @@
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h3 class="card-title">Küche</h3>
+                        <h3 class="card-title">Küche (Status)</h3>
 
-                        <h6 class="card-text mt-3"><u>Rollladensteuerung:</u></h6>
-                        <label for="customRange3" class="form-label">Rollladen Küche Nord</label>
-                        <input type="range" class="form-range" id="customRange3">
-                        <label for="customRange4" class="form-label">Rollladen Küche West</label>
-                        <input type="range" class="form-range" id="customRange4">
-
-                        <h6 class="card-text mt-3"><u>Heizungssteuerung:</u></h6>
-                        <div class="d-flex justify-content-center align-items-center mb-3">
-                            <button type="button" class="btn" id="minusbtn2"><i class="bi bi-dash-circle"></i></button>
-                            <h2 id="temperature2" class="mb-0 mx-2">20.7°C</h2>
-                            <button type="button" class="btn" id="plusbtn2"><i class="bi bi-plus-circle"></i></button>
-                        </div>
-
-                        <h6 class="card-text mt-3"><u>Steckdosensteuerung:</u></h6>
-                        <div class="switches">
-                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
-                                <label class="form-check-label" for="switchThermomix">Steckdose Thermomix</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="text small mx-5">Off</span>
-                                    <input class="form-check-input" type="checkbox" id="switchThermomix">
-                                    <span class="text small mx-2">On</span>
+                        <h6 class="card-text m-3 text-center"><u>Rollladen-Status:</u></h6>
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Küche Nord</p>
+                                    <img class="img-fluid" src="./pictures/blinds_open.png" alt="Rollladen geschlossen"
+                                        width="100px">
+                                    <h3>0%</h3>
                                 </div>
                             </div>
 
-                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
-                                <label class="form-check-label" for="switchKaffee">Steckdose Kaffeemaschine</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="text small mx-5">Off</span>
-                                    <input class="form-check-input" type="checkbox" id="switchKaffee" checked>
-                                    <span class="text small mx-2">On</span>
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Küche West</p>
+                                    <img class="img-fluid" src="./pictures/blinds_closed.png" alt="Rollladen halb"
+                                        width="100px">
+                                    <h3>100%</h3>
                                 </div>
                             </div>
                         </div>
 
-                        <h6 class="card-text mt-3"><u>Lichtsteuerung:</u></h6>
-                        <div class="switches">
-                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
-                                <label class="form-check-label" for="switchEsstisch">Licht Esstisch</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="text small mx-5">Off</span>
-                                    <input class="form-check-input" type="checkbox" id="switchEsstisch" checked>
-                                    <span class="text small mx-2">On</span>
+                        <h6 class="card-text m-3 text-center"><u>Aktuelle Temperatur:</u></h6>
+                        <div class="card">
+                            <div class="d-flex justify-content-center align-items-center m-1">
+                                <h2 id="temperature" class="mb-0 mx-2">20.7°C</h2>
+                            </div>
+                        </div>
+
+
+                        <h6 class="card-text m-3 text-center"><u>Steckdosen-Status:</u></h6>
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Steckdose Thermomix</p>
+                                    <img class="img-fluid" src="./pictures/steckdose_off.png" alt="Steckdose aus"
+                                        width="70px">
+                                    <h3>Off</h3>
+                                </div>
+                            </div>
+
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Steckdose Kaffeemaschine</p>
+                                    <img class="img-fluid" src="./pictures/steckdose_on.png" alt="Steckdose an"
+                                        width="70px">
+                                    <h3>On</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="card-text m-3 text-center"><u>Licht-Status:</u></h6>
+                        <div
+                            class="d-flex justify-content-center align-items-center align-items-stretch flex-wrap gap-3">
+                            <div class="card" style="width: 47%;">
+                                <div class="card-title text-center m-2">Küchenzeile</div>
+                                <div class="card-body text-center">
+                                    <img class="img-fluid" src="./pictures/lightbulb_on.png" alt="Licht an"
+                                        width="70px">
+                                    <h3>On</h3>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <a href="room_kitchen.html" class="btn btn-primary">Zur Küche</a>
+                    <a href="room_kitchen.html" class="btn btn-primary">Anpassen</a>
                 </div>
             </div>
 
@@ -169,66 +202,81 @@
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h3 class="card-title">Badezimmer</h3>
+                        <h3 class="card-title">Badezimmer (Status)</h3>
 
-                        <h6 class="card-text mt-3"><u>Rollladensteuerung:</u></h6>
-                        <label for="customRange5" class="form-label">Rollladen Badezimmer West</label>
-                        <input type="range" class="form-range" id="customRange5">
-                        <label for="customRange6" class="form-label">Rollladen Badezimmer Ost</label>
-                        <input type="range" class="form-range" id="customRange6">
 
-                        <h6 class="card-text mt-3"><u>Heizungssteuerung:</u></h6>
-                        <div class="d-flex justify-content-center align-items-center mb-3">
-                            <button type="button" class="btn" id="minusbtn3"><i class="bi bi-dash-circle"></i></button>
-                            <h2 id="temperature3" class="mb-0 mx-2">21.4°C</h2>
-                            <button type="button" class="btn" id="plusbtn3"><i class="bi bi-plus-circle"></i></button>
-                        </div>
-
-                        <h6 class="card-text mt-3"><u>Steckdosensteuerung:</u></h6>
-                        <div class="switches">
-                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
-                                <label class="form-check-label" for="switchZahnbuerste">Steckdose
-                                    Zahnbürste</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="text small mx-5">Off</span>
-                                    <input class="form-check-input" type="checkbox" id="switchZahnbuerste">
-                                    <span class="text small mx-2">On</span>
+                        <h6 class="card-text m-3 text-center"><u>Rollladen-Status:</u></h6>
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Badezimmer West</p>
+                                    <img class="img-fluid" src="./pictures/blinds_half.png" alt="Rollladen geschlossen"
+                                        width="100px">
+                                    <h3>40%</h3>
                                 </div>
                             </div>
 
-                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
-                                <label class="form-check-label" for="switchWaschmaschine">Steckdose
-                                    Waschmaschine</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="text small mx-5">Off</span>
-                                    <input class="form-check-input" type="checkbox" id="switchWaschmaschine" checked>
-                                    <span class="text small mx-2">On</span>
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Badezimmer Ost</p>
+                                    <img class="img-fluid" src="./pictures/blinds_open.png" alt="Rollladen halb"
+                                        width="100px">
+                                    <h3>0%</h3>
                                 </div>
                             </div>
                         </div>
 
-                        <h6 class="card-text mt-3"><u>Lichtsteuerung:</u></h6>
-                        <div class="switches">
-                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
-                                <label class="form-check-label" for="switchSpiegel">Schminkspiegel</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="text small mx-5">Off</span>
-                                    <input class="form-check-input" type="checkbox" id="switchSpiegel">
-                                    <span class="text small mx-2">On</span>
+                        <h6 class="card-text m-3 text-center"><u>Aktuelle Temperatur:</u></h6>
+                        <div class="card">
+                            <div class="d-flex justify-content-center align-items-center m-1">
+                                <h2 id="temperature" class="mb-0 mx-2">21.4°C</h2>
+                            </div>
+                        </div>
+
+                        <h6 class="card-text m-3 text-center"><u>Steckdosen-Status:</u></h6>
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Steckdose Zahnbürste</p>
+                                    <img class="img-fluid" src="./pictures/steckdose_on.png" alt="Steckdose an"
+                                        width="70px">
+                                    <h3>On</h3>
                                 </div>
                             </div>
 
-                            <div class="form-check form-switch d-flex align-items-center justify-content-between">
-                                <label class="form-check-label" for="switchDeckeBad">Deckenleuchten</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="text small mx-5">Off</span>
-                                    <input class="form-check-input" type="checkbox" id="switchDeckeBad">
-                                    <span class="text small mx-2">On</span>
+                            <div class="card" style="width: 47%;">
+                                <div class="card-body text-center">
+                                    <p>Steckdose Waschmaschine</p>
+                                    <img class="img-fluid" src="./pictures/steckdose_on.png" alt="Steckdose an"
+                                        width="70px">
+                                    <h3>On</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="card-text m-3 text-center"><u>Licht-Status:</u></h6>
+                        <div
+                            class="d-flex justify-content-center align-items-center align-items-stretch flex-wrap gap-3">
+                            <div class="card" style="width: 47%;">
+                                <div class="card-title text-center m-2">Schminkspiegel</div>
+                                <div class="card-body text-center">
+                                    <img class="img-fluid" src="./pictures/lightbulb_on.png" alt="Licht an"
+                                        width="70px">
+                                    <h3>On</h3>
+                                </div>
+                            </div>
+
+                            <div class="card" style="width: 47%;">
+                                <div class="card-title text-center m-2">Deckenleuchten</div>
+                                <div class="card-body text-center">
+                                    <img class="img-fluid" src="./pictures/lightbulb_off.png" alt="Licht aus"
+                                        width="70px">
+                                    <h3>Off</h3>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <a href="room_bathroom.html" class="btn btn-primary">Zum Badezimmer</a>
+                    <a href="room_bathroom.html" class="btn btn-primary">Anpassen</a>
                 </div>
             </div>
         </div>
