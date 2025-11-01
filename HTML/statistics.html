@@ -7,7 +7,9 @@
     <title>Statistik</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <script src="js/bootstrap.bundle.min.js"></script>
 </head>
 
@@ -15,30 +17,212 @@
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <a class="navbar-brand" href="dashboard.html">
-                <img src="./pictures/logo.jpg" alt="Bootstrap" width="50" height="50"
-                    class="d-inline-block align-text-center">
+                <img src="./pictures/logo.jpg" alt="Bootstrap" width="50" height="50" class="d-inline-block align-text-center">
                 Mein Smart-Home Dashboard
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="dashboard.html">Home</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="roomlist.html">Räume</a></li>
-                    <li class="nav-item"><a class="nav-link" href="device.html">Geräte</a></li>
-                    <li class="nav-item"><a class="nav-link" href="statistics.html">Statistik</a></li>
-                    <li class="nav-item"><a class="nav-link" href="automation.html">Automation</a></li>
-                    <li class="nav-item"><a class="nav-link" href="settings.html">Einstellungen</a></li>
-                </ul>
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="dashboard.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="roomlist.html">Räume</a></li>
+                <li class="nav-item"><a class="nav-link" href="device.html">Geräte</a></li>
+                <li class="nav-item"><a class="nav-link active" href="statistics.html">Statistik</a></li>
+                <li class="nav-item"><a class="nav-link" href="automation.html">Automation</a></li>
+                <li class="nav-item"><a class="nav-link" href="settings.html">Einstellungen</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1 class="mb-4">Energie-Statistiken</h1>
+    
+    <!-- Übersich heute -->
+    <div class="row g-4">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card shadow-sm p-3 rounded-4 text-center">
+                <h5 class="card-title">Stromverbrauch</h5>
+                <h2 class="text-primary mb-0">12,4 kWh</h2>
+                <small>heute</small>
             </div>
         </div>
-    </nav>
-
-    <div class="container">
-        <h1>Statistik</h1>
+        
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card shadow-sm p-3 rounded-4 text-center">
+                <h5 class="card-title">Solarertrag</h5>
+                <h2 class="text-success mb-0">17,8 kWh</h2>
+                <small>heute</small>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card shadow-sm p-3 rounded-4 text-center">
+                <h5 class="card-title">Bilanz</h5>
+                <h2 class="text-success mb-0">+5,4 kWh</h2>
+                <small>Überschuss</small>
+            </div>
+        </div>
     </div>
+    
+    <!-- Card 1: Verbrauch vs. Ertrag (Woche, Monat, Jahr)) -->
+    <div class="card shadow-sm p-4 rounded-4 mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+            <h3 class="card-title mb-0">Verbrauch vs. Ertrag</h3>
+            <div class="dropdown mt-2 mt-md-0">
+                <button id="dropdownTime" class="btn btn-primary dropdown-toggle" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                Zeitraum auswählen
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownTime">
+                <li><a class="dropdown-item" href="#" data-range="week">Woche</a></li>
+                <li><a class="dropdown-item" href="#" data-range="month">Monat</a></li>
+                <li><a class="dropdown-item" href="#" data-range="year">Jahr</a></li>
+            </ul>
+        </div>
+    </div>
+    <canvas id="chartEnergy" height="400"></canvas>
+</div>
 
+<!-- Card 2 Verbrauch Steckdose 7 Tage -->
+<div class="card shadow-sm p-4 rounded-4 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <h3 class="card-title mb-0">Verbrauch pro Steckdose (7 Tage)</h3>
+        <div class="dropdown mt-2 mt-md-0">
+            <button id="dropdownOutlet" class="btn btn-primary dropdown-toggle" type="button"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            Steckdose auswählen
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownOutlet">
+            <li><a class="dropdown-item" href="#" data-outlet="living_tv">Steckdose Wohnzimmer</a></li>
+            <li><a class="dropdown-item" href="#" data-outlet="sofa_strip">Sofa-Ladeleiste</a></li>
+            <li><a class="dropdown-item" href="#" data-outlet="thermomix">Steckdose Thermomix</a></li>
+            <li><a class="dropdown-item" href="#" data-outlet="coffee">Steckdose Kaffeemaschine</a></li>
+            <li><a class="dropdown-item" href="#" data-outlet="toothbrush">Steckdose Zahnbürste</a></li>
+            <li><a class="dropdown-item" href="#" data-outlet="washer">Steckdose Waschmaschine</a></li>
+        </ul>
+    </div>
+</div>
+<canvas id="chartOutlet" height="400"></canvas>
+</div>
+</div>
 </body>
 </html>
+
+
+<script>
+    // Dropdown-Label (allgemein)
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', (ev) => {
+            const btn = ev.target.closest('.dropdown').querySelector('.dropdown-toggle');
+            btn.textContent = ev.target.textContent;
+        });
+    });
+    
+    // ------- MOCK-DATEN für Verbrauch/Ertrag -------
+    function labelsFor(range) {
+        if (range === 'week') return ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+        if (range === 'month') return Array.from({ length: 30 }, (_, i) => `${i + 1}.`);
+        if (range === 'year') return ['Jan', 'Feb', 'Mrz', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+        return [];
+    }
+    
+    function mockEnergy(range) {
+        const n = range === 'week' ? 7 : (range === 'month' ? 30 : 12);
+        const consumption = Array.from({ length: n }, (_, i) =>
+        +(3.2 + Math.sin(i / 2) * 0.6 + Math.random() * 0.4).toFixed(2)
+        );
+        const solar = Array.from({ length: n }, (_, i) =>
+        +(3.5 + Math.cos(i / 3) * 0.8 + Math.random() * 0.5).toFixed(2)
+        );
+        return { labels: labelsFor(range), consumption, solar };
+    }
+    
+    // ------- Chart initialisieren (Standard: Woche) -------
+    const ctxEnergy = document.getElementById('chartEnergy');
+    const initial = mockEnergy('week');
+    
+    const energyChart = new Chart(ctxEnergy, {
+        type: 'line',
+        data: {
+            labels: initial.labels,
+            datasets: [
+            { label: 'Verbrauch (kWh)', data: initial.consumption, borderColor: '#0d6efd', tension: 0.3 },
+            { label: 'Solarertrag (kWh)', data: initial.solar, borderColor: '#198754', tension: 0.3 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } },
+            interaction: { mode: 'index', intersect: false }
+        }
+    });
+    
+    // ------- Zeitraum-Dropdown: Chart updaten -------
+    document.querySelectorAll('#dropdownTime + .dropdown-menu .dropdown-item')
+    .forEach(a => a.addEventListener('click', () => {
+        const range = a.dataset.range; // 'week' | 'month' | 'year'
+        const d = mockEnergy(range);
+        energyChart.data.labels = d.labels;
+        energyChart.data.datasets[0].data = d.consumption;
+        energyChart.data.datasets[1].data = d.solar;
+        energyChart.update();
+    }));
+    
+    
+
+        // ------- MOCK-DATEN für Verbrauch/Ertrag -------
+    const outletLabels = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+    
+    // Mock-Daten je Steckdose (kWh/Tag, 7 Werte)
+    const outletSeries = {
+        'Steckdose Wohnzimmer':     [1.2, 1.0, 1.3, 1.1, 1.5, 1.4, 1.2],
+        'Sofa-Ladeleiste':          [0.4, 0.35, 0.5, 0.45, 0.55, 0.4, 0.5],
+        'Steckdose Thermomix':      [0.0, 0.9, 0.0, 0.0, 1.0, 0.0, 0.0],
+        'Steckdose Kaffeemaschine': [0.3, 0.25, 0.4, 0.35, 0.45, 0.3, 0.4],
+        'Steckdose Zahnbürste':     [0.05,0.05,0.05,0.05,0.05,0.05,0.05],
+        'Steckdose Waschmaschine':  [0.0, 1.3, 0.0, 0.0, 0.0, 1.5, 0.0]
+    };
+    
+
+    let currentOutlet = 'Steckdose Wohnzimmer';
+
+    const ctxOutlet = document.getElementById('chartOutlet');
+    const outletChart = new Chart(ctxOutlet, {
+        type: 'line',
+        data: {
+            labels: outletLabels,
+            datasets: [{
+                label: currentOutlet,
+                data: outletSeries[currentOutlet],
+                borderColor: '#0d6efd',
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } },
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'kWh pro Tag' }
+                }
+            }
+        }
+    });
+    
+    // Dropdown für Steckdose mit vorhandenen Steckdosen
+    document.querySelectorAll('#dropdownOutlet + .dropdown-menu .dropdown-item')
+    .forEach(a => a.addEventListener('click', () => {
+        const name = a.textContent.trim(); 
+        if (!outletSeries[name]) return;
+        currentOutlet = name;
+        outletChart.data.datasets[0].label = currentOutlet;
+        outletChart.data.datasets[0].data  = outletSeries[currentOutlet];
+        outletChart.update();
+    }));
+    
+</script>
