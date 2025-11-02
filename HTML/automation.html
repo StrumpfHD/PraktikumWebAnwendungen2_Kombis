@@ -6,8 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Automation</title>
   <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <script src="js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    .card {
+      position: relative;
+    }
+    .delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+  </style>
 </head>
 
 <body>
@@ -38,9 +50,12 @@
     <h1 class="mb-4">Automatisierungen</h1>
 
     <div class="row g-4 mt-2">
+
       <!-- Nachtmodus -->
       <div class="col-12 col-md-6">
         <div class="card h-100 shadow-sm">
+          <button class="btn btn-danger btn-sm delete-btn"
+            onclick="alert('Modus wurde gelöscht!');"><i class="bi bi-trash"></i></button>
           <div class="card-body">
             <h3 class="card-title"><i class="bi bi-moon-stars-fill me-2"></i>Nachtmodus</h3>
             <p class="card-text">Aktiviert den Nachtmodus: Lichter aus, Rolläden herunter, Temperatur auf 20°C.</p>
@@ -55,6 +70,8 @@
       <!-- Urlaubsmodus -->
       <div class="col-12 col-md-6">
         <div class="card h-100 shadow-sm">
+          <button class="btn btn-danger btn-sm delete-btn"
+            onclick="alert('Modus wurde gelöscht!');"><i class="bi bi-trash"></i></button>
           <div class="card-body">
             <h3 class="card-title"><i class="bi bi-suitcase-fill me-2"></i>Urlaubsmodus</h3>
             <p class="card-text">Aktiviert den Urlaubsmodus: Rolläden halb, Lichter aus, Temperatur reduziert auf 20°C.</p>
@@ -65,8 +82,11 @@
           </div>
         </div>
       </div>
-    </div>
 
+    </div>
+    <a href="#">
+            <button class="btn btn-primary mt-3"><i class="bi bi-plus-circle"></i> Automatision hinzufügen</button>
+        </a>
   </div>
 </body>
 </html>
