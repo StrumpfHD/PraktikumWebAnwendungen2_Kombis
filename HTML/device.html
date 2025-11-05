@@ -259,7 +259,7 @@
 
     </div>
 
-    <div id="modalContainer"></div>
+    <div id="modalContainerDevice"></div>
 
 
     <script type="module">
@@ -269,7 +269,7 @@
         fetch('add_device_modal.html')
             .then(res => res.text())
             .then(html => {
-                document.getElementById('modalContainer').innerHTML = html;
+                document.getElementById('modalContainerDevice').innerHTML = html;
                 initModal('addDeviceModal');
                 initDropdowns();
             });

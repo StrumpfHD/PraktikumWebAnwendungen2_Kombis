@@ -99,10 +99,34 @@
             </div>
 
             <div class="card-body">
-                <button class="btn btn-primary"><i class="bi bi-plus-circle"></i> Raum hinzufügen</button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                    <i class="bi bi-plus-circle"></i> Raum hinzufügen
+                </button>
             </div>
         </div>
     </div>
+
+    <div id="modalContainerRoom"></div>
+
+
+    <script type="module">
+        import { initModal } from './js/add_room_modal.js';
+
+        // Modal HTML laden
+        fetch('add_room_modal.html')
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('modalContainerRoom').innerHTML = html;
+                initModal('addRoomModal');
+
+                const modalElement = document.getElementById('addRoomModal');
+                const modal = new bootstrap.Modal(modalElement);
+
+                document.getElementById('openRoomModal').addEventListener('click', () => {
+                    modal.show();
+                });
+            });
+    </script>
 
 </body>
 

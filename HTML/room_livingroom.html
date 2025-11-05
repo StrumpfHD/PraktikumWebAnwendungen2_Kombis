@@ -100,7 +100,7 @@
         </div>
     </div>
 
-    <div id="modalContainer"></div>
+    <div id="modalContainerRoom"></div>
 
     <script type="module">
         import { initModal, initDropdowns } from './js/add_device_modal.js';
@@ -109,7 +109,7 @@
         fetch('add_device_modal.html')
             .then(res => res.text())
             .then(html => {
-                document.getElementById('modalContainer').innerHTML = html;
+                document.getElementById('modalContainerRoom').innerHTML = html;
                 initModal('addDeviceModal');
                 initDropdowns();
             });

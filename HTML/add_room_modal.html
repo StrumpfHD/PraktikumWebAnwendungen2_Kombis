@@ -1,0 +1,37 @@
+<div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="addRoomModalLabel">Neuen Raum hinzufügen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                    Raum wurde erfolgreich hinzugefügt!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Schließen"></button>
+                </div>
+
+                <div class="card border-0">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label for="room_name" class="form-label fw-bold">Raumname</label>
+                            <input type="text" name="room_name" id="room_name" class="form-control"
+                                placeholder="z. B. Kinderzimmer" required>
+                            <small id="nameHelp" class="form-text text-muted">
+                                Eindeutiger Name zur leichteren Steuerung
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                <button type="button" class="btn btn-primary" id="saveroomBtn">Raum hinzufügen</button>
+            </div>
+
+        </div>
+    </div>
+</div>
