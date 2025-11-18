@@ -37,62 +37,13 @@
     <div class="container">
         <h1>Übersicht aller Räume</h1>
     </div>
+
+
     <div class="container-lg">
         <div class="card h-100">
             <div class="card-body">
-                <div class="list-group mt-3">
-
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="room_livingroom.html" class="text-decoration-none text-dark flex-grow-1">
-                            <div class="d-flex align-items-center">
-                                <h4 class="mb-0 me-2">Wohnzimmer</h4>
-                                <span class="badge bg-secondary">7 Geräte</span>
-                            </div>
-                        </a>
-                        <div class="d-flex gap-1">
-                            <button class="btn btn-primary btn-sm" title="Bearbeiten">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" title="Löschen">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="room_kitchen.html" class="text-decoration-none text-dark">
-                            <div class="d-flex align-items-center">
-                                <h4 class="mb-0 me-2">Küche</h4>
-                                <span class="badge bg-secondary">6 Geräte</span>
-                            </div>
-                        </a>
-                        <div class="d-flex gap-1">
-                            <button class="btn btn-primary btn-sm" title="Bearbeiten">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" title="Löschen">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="room_bathroom.html" class="text-decoration-none text-dark">
-                            <div class="d-flex align-items-center">
-                                <h4 class="mb-0 me-2">Badezimmer</h4>
-                                <span class="badge bg-secondary">9 Geräte</span>
-                            </div>
-                        </a>
-                        <div class="d-flex gap-1">
-                            <button class="btn btn-primary btn-sm" title="Bearbeiten">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" title="Löschen">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-
+                <div class="list-group mt-3" id="roomListContainer">
+                    <!-- Räume werden hier per JS eingefügt -->
                 </div>
             </div>
 
@@ -109,22 +60,78 @@
 
     <script type="module">
         import { initModal } from './js/add_room_modal.js';
+        import { openDeleteModal } from './js/delete_modal.js';  // generisches Delete-Modal importieren
 
-        // Modal HTML laden
+        // Räume laden
+        async function loadRooms() {
+            try {
+                const res = await fetch('/api/rooms');
+                const rooms = await res.json();
+
+                const container = document.getElementById('roomListContainer');
+                container.innerHTML = '';
+
+                rooms.forEach(room => {
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+                    item.innerHTML = `
+                <a href="room_${room.name.toLowerCase()}.html" class="text-decoration-none text-dark flex-grow-1">
+                    <div class="d-flex align-items-center">
+                        <h4 class="mb-0 me-2">${room.name}</h4>
+                        <span class="badge bg-secondary">0 Geräte</span>
+                    </div>
+                </a>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-primary btn-sm" title="Bearbeiten">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm delete-room-btn" data-id="${room.room_id}" title="Löschen">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+                    container.appendChild(item);
+                });
+
+                // Eventlistener für Löschen
+                container.querySelectorAll('.delete-room-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const roomId = btn.dataset.id;
+                        const roomName = btn.closest('.list-group-item').querySelector('h4').textContent;
+
+                        openDeleteModal(
+                            `Möchten Sie den Raum "${roomName}" wirklich löschen?`,
+                            async () => {
+                                const res = await fetch(`/api/rooms/${roomId}`, { method: 'DELETE' });
+                                if (res.ok) {
+                                    loadRooms();  // Liste neu laden
+                                } else {
+                                    alert('Fehler beim Löschen!');
+                                }
+                            }
+                        );
+                    });
+                });
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Add-Room-Modal laden
         fetch('add_room_modal.html')
             .then(res => res.text())
             .then(html => {
                 document.getElementById('modalContainerRoom').innerHTML = html;
-                initModal('addRoomModal');
-
-                const modalElement = document.getElementById('addRoomModal');
-                const modal = new bootstrap.Modal(modalElement);
-
-                document.getElementById('openRoomModal').addEventListener('click', () => {
-                    modal.show();
-                });
+                initModal('addRoomModal', loadRooms);
             });
+
+        // Räume beim Laden der Seite anzeigen
+        loadRooms();
     </script>
+
+
 
 </body>
 

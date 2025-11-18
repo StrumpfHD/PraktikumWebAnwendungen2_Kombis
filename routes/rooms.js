@@ -28,4 +28,35 @@ router.post('/', async (req, res) => {
     }
 });
 
+// GET /api/rooms → alle Räume abrufen
+router.get('/', async (req, res) => {
+    try {
+        const db = await openDb();
+        const rooms = await db.all("SELECT room_id, name FROM room");
+        res.json(rooms);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Datenbankfehler" });
+    }
+});
+
+// DELETE /api/rooms/:id → Raum löschen
+router.delete('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const db = await openDb();
+
+        const result = await db.run("DELETE FROM room WHERE room_id = ?", [id]);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "Raum nicht gefunden" });
+        }
+
+        res.json({ message: "Raum erfolgreich gelöscht" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Datenbankfehler" });
+    }
+});
+
 module.exports = router;

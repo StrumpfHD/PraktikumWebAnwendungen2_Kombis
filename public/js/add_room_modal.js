@@ -1,7 +1,7 @@
-export function initModal(modalId) {
+export function initModal(modalId, loadRooms) {
     const addRoomModal = document.getElementById(modalId);
 
-    // Modal resetten beim Öffnen
+    // Modal zurücksetzen beim Schließen
     addRoomModal.addEventListener('hidden.bs.modal', () => {
         document.getElementById('room_name').value = '';
         const alertEl = document.getElementById('successAlert');
@@ -9,24 +9,7 @@ export function initModal(modalId) {
         alertEl.classList.add('d-none');
     });
 
-    // Raum hinzufügen Button
-    document.getElementById('saveroomBtn').addEventListener('click', () => {
-        const alertEl = document.getElementById('successAlert');
-        alertEl.classList.remove('d-none');
-        alertEl.classList.add('show');
-
-        // Modal schließen nach 2 Sekunden
-        const modal = bootstrap.Modal.getOrCreateInstance(addRoomModal);
-        setTimeout(() => modal.hide(), 2000);
-
-        // Alert automatisch nach 2 Sekunden ausblenden
-        setTimeout(() => {
-            alertEl.classList.remove('show');
-            alertEl.classList.add('d-none');
-        }, 2000);
-    });
-
-
+    // EIN EINZIGER Click-Listener
     document.getElementById('saveroomBtn').addEventListener('click', async () => {
         const roomName = document.getElementById('room_name').value.trim();
         if (!roomName) return;
@@ -38,26 +21,35 @@ export function initModal(modalId) {
                 body: JSON.stringify({ name: roomName })
             });
 
+            const alertEl = document.getElementById('successAlert');
+            alertEl.classList.remove('d-none');
+            alertEl.classList.add('show');
+
             if (response.ok) {
-                const alertEl = document.getElementById('successAlert');
-                alertEl.classList.remove('d-none');
-                alertEl.classList.add('show');
-
-                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('addRoomModal'));
-                setTimeout(() => modal.hide(), 2000);
-
+                // Modal nach 2 Sekunden schließen
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getOrCreateInstance(addRoomModal);
+                    modal.hide();
+                    alertEl.classList.remove('show');
+                    alertEl.classList.add('d-none');
+                    document.getElementById('room_name').value = '';
+                    if (typeof loadRooms === 'function') loadRooms(); // neue Liste laden
+                }, 2000);
+            } else {
+                alert("Fehler beim Speichern!");
                 setTimeout(() => {
                     alertEl.classList.remove('show');
                     alertEl.classList.add('d-none');
                 }, 2000);
-
-                document.getElementById('room_name').value = '';
-            } else {
-                alert("Fehler beim Speichern!");
             }
         } catch (err) {
             console.error(err);
             alert("Serverfehler!");
+            const alertEl = document.getElementById('successAlert');
+            setTimeout(() => {
+                alertEl.classList.remove('show');
+                alertEl.classList.add('d-none');
+            }, 2000);
         }
     });
 }
