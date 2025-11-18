@@ -1,0 +1,26 @@
+{
+  "name": "praktikumwebanwendungen2_kombis",
+  "version": "1.0.0",
+  "description": "---",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StrumpfHD/PraktikumWebAnwendungen2_Kombis.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/StrumpfHD/PraktikumWebAnwendungen2_Kombis/issues"
+  },
+  "homepage": "https://github.com/StrumpfHD/PraktikumWebAnwendungen2_Kombis#readme",
+  "dependencies": {
+    "express": "^5.1.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  }
+}
