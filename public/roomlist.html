@@ -59,8 +59,9 @@
 
 
     <script type="module">
-        import { initModal } from './js/add_room_modal.js';
-        import { openDeleteModal } from './js/delete_modal.js';  // generisches Delete-Modal importieren
+        import { initModal } from './js/add_room_modal.js';     //Add_room-Modal importieren
+        import { openDeleteModal } from './js/delete_modal.js';  //Delete-Modal importieren
+        import { openEditModal } from './js/edit_modal.js';     //Edit-Modal importieren
 
         // Räume laden
         async function loadRooms() {
@@ -108,6 +109,31 @@
                                     loadRooms();  // Liste neu laden
                                 } else {
                                     alert('Fehler beim Löschen!');
+                                }
+                            }
+                        );
+                    });
+                });
+
+                // Eventlistener für Bearbeiten
+                container.querySelectorAll('.btn-primary').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const roomId = btn.closest('.list-group-item').querySelector('.delete-room-btn').dataset.id;
+                        const roomName = btn.closest('.list-group-item').querySelector('h4').textContent;
+
+                        openEditModal(
+                            'Raum bearbeiten',
+                            roomName,
+                            async (newName) => {
+                                const res = await fetch(`/api/rooms/${roomId}`, {
+                                    method: 'PUT', // PUT oder PATCH für Update
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ name: newName })
+                                });
+                                if (res.ok) {
+                                    loadRooms(); // Liste neu laden
+                                } else {
+                                    alert('Fehler beim Bearbeiten!');
                                 }
                             }
                         );

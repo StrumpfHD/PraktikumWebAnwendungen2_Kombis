@@ -59,4 +59,26 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// PUT /api/rooms/:id → Raumname bearbeiten
+router.put('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name } = req.body;
+
+        if (!name) return res.status(400).json({ error: "Name ist erforderlich" });
+
+        const db = await openDb();
+        const result = await db.run("UPDATE room SET name = ? WHERE room_id = ?", [name, id]);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "Raum nicht gefunden" });
+        }
+
+        res.json({ message: "Raum erfolgreich bearbeitet" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Datenbankfehler" });
+    }
+});
+
 module.exports = router;
