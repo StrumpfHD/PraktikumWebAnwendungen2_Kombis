@@ -3,7 +3,7 @@ let editCallback = null;
 /**
  * Modal einmal pro Seite laden
  */
-fetch('edit_modal.html')
+fetch('edit_room_modal.html')
   .then(res => res.text())
   .then(html => {
       document.body.insertAdjacentHTML('beforeend', html);
@@ -26,7 +26,7 @@ fetch('edit_modal.html')
  * @param {string} currentValue - aktueller Wert, der angezeigt werden soll
  * @param {function} callback - Funktion, die beim Speichern ausgeführt wird
  */
-export function openEditModal(title, currentValue, callback) {
+export function openEditRoomModal(title, currentValue, callback) {
     const modalEl = document.getElementById('editModal');
     const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
 

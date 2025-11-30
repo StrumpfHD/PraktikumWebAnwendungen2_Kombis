@@ -33,7 +33,6 @@
         </div>
     </nav>
 
-    <!-- Raumanzeige -->
     <div class="container">
         <h1>Übersicht aller Räume</h1>
     </div>
@@ -43,7 +42,7 @@
         <div class="card h-100">
             <div class="card-body">
                 <div class="list-group mt-3" id="roomListContainer">
-                    <!-- Räume werden hier per JS eingefügt -->
+                    <!-- Dynamischer Inhalt -> Räume -->
                 </div>
             </div>
 
@@ -59,11 +58,10 @@
 
 
     <script type="module">
-        import { initModal } from './js/add_room_modal.js';     //Add_room-Modal importieren
-        import { openDeleteModal } from './js/delete_modal.js';  //Delete-Modal importieren
-        import { openEditModal } from './js/edit_modal.js';     //Edit-Modal importieren
+        import { initModal } from './js/add_room_modal.js';
+        import { openDeleteModal } from './js/delete_modal.js';  
+        import { openEditRoomModal } from './js/edit_room_modal.js';    
 
-        // Räume laden
         async function loadRooms() {
             try {
                 const res = await fetch('/api/rooms');
@@ -106,7 +104,7 @@
                             async () => {
                                 const res = await fetch(`/api/rooms/${roomId}`, { method: 'DELETE' });
                                 if (res.ok) {
-                                    loadRooms();  // Liste neu laden
+                                    loadRooms();
                                 } else {
                                     alert('Fehler beim Löschen!');
                                 }
@@ -121,17 +119,17 @@
                         const roomId = btn.closest('.list-group-item').querySelector('.delete-room-btn').dataset.id;
                         const roomName = btn.closest('.list-group-item').querySelector('h4').textContent;
 
-                        openEditModal(
+                        openEditRoomModal(
                             'Raum bearbeiten',
                             roomName,
                             async (newName) => {
                                 const res = await fetch(`/api/rooms/${roomId}`, {
-                                    method: 'PUT', // PUT oder PATCH für Update
+                                    method: 'PUT',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ name: newName })
                                 });
                                 if (res.ok) {
-                                    loadRooms(); // Liste neu laden
+                                    loadRooms();
                                 } else {
                                     alert('Fehler beim Bearbeiten!');
                                 }
