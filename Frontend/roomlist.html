@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raumanzeige</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">
+                <img src="./pictures/logo.jpg" alt="Bootstrap" width="50" height="50"
+                    class="d-inline-block align-text-center">
+                Mein Smart-Home Dashboard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="roomlist.html">Räume</a></li>
+                    <li class="nav-item"><a class="nav-link" href="device.html">Geräte</a></li>
+                    <li class="nav-item"><a class="nav-link" href="statistics.html">Statistik</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-3">
+        <h1>Übersicht aller Räume</h1>
+    </div>
+
+    <div class="container-lg">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="list-group mt-3" id="roomListContainer">
+                    <!-- Dynamischer Inhalt -> Räume wird hier eingefügt -->
+                </div>
+            </div>
+
+            <div class="card-body">
+                <button class="btn btn-primary" id="openAddRoomModalBtn">
+                    <i class="bi bi-plus-circle"></i> Raum hinzufügen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal zum Hinzufügen eines Raumes -->
+    <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 shadow">
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="addRoomModalLabel">Neuen Raum hinzufügen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                        Raum wurde erfolgreich hinzugefügt!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Schließen"></button>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="room_name" class="form-label fw-bold">Raumname</label>
+                        <input type="text" name="room_name" id="room_name" class="form-control"
+                            placeholder="z. B. Kinderzimmer" required>
+                        <small id="nameHelp" class="form-text text-muted">
+                            Eindeutiger Name zur leichteren Steuerung
+                        </small>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="button" class="btn btn-primary" id="saveroomBtn">Raum hinzufügen</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+
+            // Bootstrap 5 Modal-Instanz
+            const addRoomModalEl = document.getElementById('addRoomModal');
+            const addRoomModal = new bootstrap.Modal(addRoomModalEl);
+
+            // Funktion: Räume laden
+            function loadRoomsAJAX() {
+                const container = $('#roomListContainer');
+                container.empty();
+
+                $.ajax({
+                    url: 'http://localhost:8000/api/rooms/all',
+                    method: 'GET',
+                    dataType: 'json',
+                    cache: false
+                }).done(function (rooms) {
+                    rooms.forEach(room => {
+                        const item = $(`
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="room_${room.name.toLowerCase()}.html" class="text-decoration-none text-dark flex-grow-1">
+                                <div class="d-flex align-items-center">
+                                    <h4 class="mb-0 me-2">${room.name}</h4>
+                                    <span class="badge bg-secondary">0 Geräte</span>
+                                </div>
+                            </a>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-primary btn-sm edit-room-btn" title="Bearbeiten">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm delete-room-btn" data-id="${room.room_id}" title="Löschen">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        `);
+
+                        container.append(item);
+
+                        // Löschen
+                        item.find('.delete-room-btn').click(function () {
+                            const roomId = $(this).data('id');
+                            const roomName = $(this).closest('.list-group-item').find('h4').text();
+
+                            if (confirm(`Möchten Sie den Raum "${roomName}" wirklich löschen?`)) {
+                                $.ajax({
+                                    url: `http://localhost:8000/api/rooms/delete/${roomId}`,
+                                    method: 'DELETE'
+                                }).done(loadRoomsAJAX)
+                                    .fail(() => alert('Fehler beim Löschen!'));
+                            }
+                        });
+
+                        // Bearbeiten
+                        item.find('.edit-room-btn').click(function () {
+                            const roomId = $(this).closest('.list-group-item').find('.delete-room-btn').data('id');
+                            const roomName = $(this).closest('.list-group-item').find('h4').text();
+                            const newName = prompt('Neuer Name für Raum:', roomName);
+                            if (newName && newName.trim() !== '') {
+                                $.ajax({
+                                    url: `http://localhost:8000/api/rooms/edit/${roomId}`,
+                                    method: 'PUT',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify({ name: newName })
+                                }).done(loadRoomsAJAX)
+                                    .fail(() => alert('Fehler beim Bearbeiten!'));
+                            }
+                        });
+                    });
+                }).fail(function (jqXHR) {
+                    console.error('Fehler beim Laden der Räume:', jqXHR.responseText);
+                    alert('Fehler beim Laden der Räume!');
+                });
+            }
+
+            // Räume initial laden
+            loadRoomsAJAX();
+
+            // Modal öffnen Button
+            $('#openAddRoomModalBtn').click(function () {
+                addRoomModal.show();
+            });
+
+            // Raum hinzufügen Button
+            $('#saveroomBtn').click(function () {
+                const roomName = $('#room_name').val().trim();
+                if (!roomName) {
+                    alert('Bitte gib einen Raumnamen ein!');
+                    return;
+                }
+
+                $.ajax({
+                    url: 'http://localhost:8000/api/rooms/new',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ name: roomName }),
+                    dataType: 'json'
+                }).done(function (newRoom) {
+                    addRoomModal.hide();
+                    $('#room_name').val('');
+                    loadRoomsAJAX();
+                    console.log('Neuer Raum hinzugefügt:', newRoom);
+                }).fail(function (jqXHR) {
+                    console.error('Fehler beim Hinzufügen:', jqXHR.responseText);
+                    alert('Fehler beim Hinzufügen des Raumes!');
+                });
+            });
+
+        });
+    </script>
+
+</body>
+
+</html>

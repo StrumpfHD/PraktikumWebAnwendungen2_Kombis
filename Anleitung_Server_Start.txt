@@ -1,0 +1,9 @@
+In Visual Studio Code im Backend Ordner eine Konsole öffnen:
+	-> mit "node server.js" den Backend-Server starten
+	-> im Browser über localhost:8000 errreichbar 
+	-> JSON Objekte jeweils z.B. über "localhost:8000/api/rooms/all" anzeigen
+
+
+In Konsolenfenster (CMD) im Frontend Ordner öffnen:
+	-> mit "http-server -p 3000 -c-1 --cors" den Frontend-Server starten
+	-> im Browser über localhost:3000 alle HTML Seiten erreichbar
