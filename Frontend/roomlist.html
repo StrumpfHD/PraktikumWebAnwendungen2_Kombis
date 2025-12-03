@@ -54,6 +54,31 @@
         </div>
     </div>
 
+    <!-- Modal zum Bearbeiten eines Raumes -->
+    <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="editRoomModalLabel">Raum bearbeiten</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="editModalAlert" class="alert d-none" role="alert"></div>
+
+                    <div class="mb-4">
+                        <label for="edit_room_name" class="form-label fw-bold">Raumname</label>
+                        <input type="text" name="edit_room_name" id="edit_room_name" class="form-control" required>
+                        <small class="form-text text-muted">Eindeutiger Name zur leichteren Steuerung</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="button" class="btn btn-primary" id="saveEditRoomBtn">Änderungen speichern</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal zum Hinzufügen eines Raumes -->
     <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -65,10 +90,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
-                        Raum wurde erfolgreich hinzugefügt!
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Schließen"></button>
-                    </div>
+                    <div id="modalAlert" class="alert d-none" role="alert"></div>
 
                     <div class="mb-4">
                         <label for="room_name" class="form-label fw-bold">Raumname</label>
@@ -89,15 +111,59 @@
         </div>
     </div>
 
+    <!-- Modal zum Löschen eines Raumes -->
+    <div class="modal fade" id="deleteRoomModal" tabindex="-1" aria-labelledby="deleteRoomModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="deleteRoomModalLabel">Raum löschen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="deleteRoomText">Möchten Sie diesen Raum wirklich löschen? Alle zugehörigen Geräte werden
+                        mitgelöscht!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nein</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteRoomBtn">Ja, löschen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function () {
-
-            // Bootstrap 5 Modal-Instanz
             const addRoomModalEl = document.getElementById('addRoomModal');
             const addRoomModal = new bootstrap.Modal(addRoomModalEl);
 
-            // Funktion: Räume laden
-            function loadRoomsAJAX() {
+            const editRoomModalEl = document.getElementById('editRoomModal');
+            const editRoomModal = new bootstrap.Modal(editRoomModalEl);
+            let roomIdToEdit = null;
+
+            const deleteRoomModalEl = document.getElementById('deleteRoomModal');
+            const deleteRoomModal = new bootstrap.Modal(deleteRoomModalEl);
+            let roomIdToDelete = null;
+
+            // -----------------------------
+            // Modal Alert Funktion
+            // -----------------------------
+            function showModalAlert(type, message, selector = '#modalAlert') {
+                const alertBox = $(selector);
+                alertBox
+                    .removeClass('d-none alert-success alert-danger alert-warning')
+                    .addClass(`alert alert-${type}`)
+                    .text(message);
+
+                setTimeout(() => {
+                    alertBox.addClass('d-none');
+                }, 3000);
+            }
+
+            // -----------------------------
+            // Räume laden
+            // -----------------------------
+            function loadRooms() {
                 const container = $('#roomListContainer');
                 container.empty();
 
@@ -109,55 +175,24 @@
                 }).done(function (rooms) {
                     rooms.forEach(room => {
                         const item = $(`
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="room_${room.name.toLowerCase()}.html" class="text-decoration-none text-dark flex-grow-1">
-                                <div class="d-flex align-items-center">
-                                    <h4 class="mb-0 me-2">${room.name}</h4>
-                                    <span class="badge bg-secondary">0 Geräte</span>
-                                </div>
-                            </a>
-                            <div class="d-flex gap-1">
-                                <button class="btn btn-primary btn-sm edit-room-btn" title="Bearbeiten">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-danger btn-sm delete-room-btn" data-id="${room.room_id}" title="Löschen">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="room_${room.name.toLowerCase()}.html" class="text-decoration-none text-dark flex-grow-1">
+                            <div class="d-flex align-items-center">
+                                <h4 class="mb-0 me-2">${room.name}</h4>
+                                <span class="badge bg-secondary">0 Geräte</span>
                             </div>
+                        </a>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-primary btn-sm edit-room-btn" data-id="${room.room_id}" title="Bearbeiten">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm delete-room-btn" data-id="${room.room_id}" title="Löschen">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
-                        `);
-
+                    </div>
+                `);
                         container.append(item);
-
-                        // Löschen
-                        item.find('.delete-room-btn').click(function () {
-                            const roomId = $(this).attr('data-id');
-                            const roomName = $(this).closest('.list-group-item').find('h4').text();
-
-                            if (confirm(`Möchten Sie den Raum "${roomName}" wirklich löschen? Alle zugehörigen Geräte werden mitgelöscht!`)) {
-                                $.ajax({
-                                    url: `http://localhost:8000/api/rooms/delete/${roomId}`,
-                                    method: 'DELETE'
-                                }).done(loadRoomsAJAX)
-                                    .fail(() => alert('Fehler beim Löschen!'));
-                            }
-                        });
-
-                        // Bearbeiten
-                        item.find('.edit-room-btn').click(function () {
-                            const roomId = $(this).closest('.list-group-item').find('.delete-room-btn').data('id');
-                            const roomName = $(this).closest('.list-group-item').find('h4').text();
-                            const newName = prompt('Neuer Name für Raum:', roomName);
-                            if (newName && newName.trim() !== '') {
-                                $.ajax({
-                                    url: `http://localhost:8000/api/rooms/edit/${roomId}`,
-                                    method: 'PUT',
-                                    contentType: 'application/json',
-                                    data: JSON.stringify({ name: newName })
-                                }).done(loadRoomsAJAX)
-                                    .fail(() => alert('Fehler beim Bearbeiten!'));
-                            }
-                        });
                     });
                 }).fail(function (jqXHR) {
                     console.error('Fehler beim Laden der Räume:', jqXHR.responseText);
@@ -165,41 +200,140 @@
                 });
             }
 
-            // Räume initial laden
-            loadRoomsAJAX();
+            // -----------------------------
+            // Raum hinzufügen
+            // -----------------------------
+            $('#openAddRoomModalBtn').click(() => addRoomModal.show());
 
-            // Modal öffnen Button
-            $('#openAddRoomModalBtn').click(function () {
-                addRoomModal.show();
+            addRoomModalEl.addEventListener('show.bs.modal', () => {
+                $('#room_name').val('');
             });
 
-            // Raum hinzufügen Button
-            $('#saveroomBtn').click(function () {
+            addRoomModalEl.addEventListener('shown.bs.modal', () => {
+                $('#room_name').trigger('focus');
+            });
+
+            $('#saveroomBtn').click(() => {
                 const roomName = $('#room_name').val().trim();
                 if (!roomName) {
-                    alert('Bitte gib einen Raumnamen ein!');
+                    showModalAlert('warning', 'Bitte gib einen Raumnamen ein!', '#modalAlert');
                     return;
                 }
 
                 $.ajax({
-                    url: 'http://localhost:8000/api/rooms/new',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ name: roomName }),
+                    url: 'http://localhost:8000/api/rooms/all',
+                    method: 'GET',
                     dataType: 'json'
-                }).done(function (newRoom) {
-                    addRoomModal.hide();
-                    $('#room_name').val('');
-                    loadRoomsAJAX();
-                    console.log('Neuer Raum hinzugefügt:', newRoom);
-                }).fail(function (jqXHR) {
-                    console.error('Fehler beim Hinzufügen:', jqXHR.responseText);
-                    alert('Fehler beim Hinzufügen des Raumes!');
-                });
+                }).done(function (rooms) {
+                    if (rooms.some(r => r.name.toLowerCase() === roomName.toLowerCase())) {
+                        showModalAlert('warning', `Der Raum "${roomName}" existiert bereits!`, '#modalAlert');
+                        return;
+                    }
+
+                    $.ajax({
+                        url: 'http://localhost:8000/api/rooms/new',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ name: roomName }),
+                        dataType: 'json'
+                    }).done(function () {
+                        showModalAlert('success', `Neuer Raum "${roomName}" wurde hinzugefügt!`, '#modalAlert');
+                        setTimeout(() => {
+                            addRoomModal.hide();
+                            $('#modalAlert').addClass('d-none');
+                            $('#room_name').val('');
+                            loadRooms();
+                        }, 1500);
+                    }).fail(function (jqXHR) {
+                        console.error('Fehler beim Hinzufügen:', jqXHR.responseText);
+                        showModalAlert('danger', 'Fehler beim Hinzufügen des Raumes!', '#modalAlert');
+                    });
+                }).fail(() => showModalAlert('danger', 'Fehler beim Laden der bestehenden Räume!', '#modalAlert'));
             });
 
+            // -----------------------------
+            // Raum löschen
+            // -----------------------------
+            $(document).on('click', '.delete-room-btn', function () {
+                roomIdToDelete = $(this).data('id');
+                const roomName = $(this).closest('.list-group-item').find('h4').text();
+                $('#deleteRoomText').text(`Möchten Sie den Raum "${roomName}" wirklich löschen? Alle zugehörigen Geräte werden mitgelöscht!`);
+                deleteRoomModal.show();
+            });
+
+            $('#confirmDeleteRoomBtn').click(function () {
+                if (!roomIdToDelete) return;
+
+                $.ajax({
+                    url: `http://localhost:8000/api/rooms/delete/${roomIdToDelete}`,
+                    method: 'DELETE'
+                }).done(() => {
+                    loadRooms();
+                    deleteRoomModal.hide();
+                    roomIdToDelete = null;
+                }).fail(() => showModalAlert('danger', 'Fehler beim Löschen!', '#modalAlert'));
+            });
+
+            // -----------------------------
+            // Raum bearbeiten
+            // -----------------------------
+            function showEditModal(roomId, roomName) {
+                roomIdToEdit = roomId;
+                $('#edit_room_name').val(roomName);
+                $('#editModalAlert').addClass('d-none');
+                editRoomModal.show();
+            }
+
+            $(document).on('click', '.edit-room-btn', function () {
+                const roomId = $(this).data('id');
+                const roomName = $(this).closest('.list-group-item').find('h4').text();
+                showEditModal(roomId, roomName);
+            });
+
+            $('#saveEditRoomBtn').click(() => {
+                const newName = $('#edit_room_name').val().trim();
+                if (!newName) {
+                    showModalAlert('warning', 'Bitte gib einen Raumnamen ein!', '#editModalAlert');
+                    return;
+                }
+
+                $.ajax({
+                    url: 'http://localhost:8000/api/rooms/all',
+                    method: 'GET',
+                    dataType: 'json'
+                }).done(function (rooms) {
+                    if (rooms.some(r => r.name.toLowerCase() === newName.toLowerCase() && r.room_id !== roomIdToEdit)) {
+                        showModalAlert('warning', `Der Raum "${newName}" existiert bereits!`, '#editModalAlert');
+                        return;
+                    }
+
+                    $.ajax({
+                        url: `http://localhost:8000/api/rooms/edit/${roomIdToEdit}`,
+                        method: 'PUT',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ name: newName })
+                    }).done(() => {
+                        showModalAlert('success', `Raum "${newName}" wurde erfolgreich bearbeitet!`, '#editModalAlert');
+                        setTimeout(() => {
+                            editRoomModal.hide();
+                            loadRooms();
+                            roomIdToEdit = null;
+                            $('#editModalAlert').addClass('d-none'); // Alert wieder ausblenden
+                        }, 3000);
+                    }).fail(() => showModalAlert('danger', 'Fehler beim Bearbeiten des Raums!', '#editModalAlert'));
+                }).fail(() => showModalAlert('danger', 'Fehler beim Laden der bestehenden Räume!', '#editModalAlert'));
+            });
+
+            editRoomModalEl.addEventListener('shown.bs.modal', () => {
+                $('#edit_room_name').trigger('focus');
+            });
+
+            // Initial laden
+            loadRooms();
         });
+
     </script>
+
 
 </body>
 
