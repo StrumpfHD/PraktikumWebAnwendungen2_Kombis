@@ -131,10 +131,10 @@
 
                         // Löschen
                         item.find('.delete-room-btn').click(function () {
-                            const roomId = $(this).data('id');
+                            const roomId = $(this).attr('data-id');
                             const roomName = $(this).closest('.list-group-item').find('h4').text();
 
-                            if (confirm(`Möchten Sie den Raum "${roomName}" wirklich löschen?`)) {
+                            if (confirm(`Möchten Sie den Raum "${roomName}" wirklich löschen? Alle zugehörigen Geräte werden mitgelöscht!`)) {
                                 $.ajax({
                                     url: `http://localhost:8000/api/rooms/delete/${roomId}`,
                                     method: 'DELETE'

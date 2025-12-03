@@ -1,11 +1,11 @@
 In Visual Studio Code im Backend Ordner eine Konsole öffnen:
 	-> alle nötigen Module installieren (siehe Fehlermeldung bei Versuch mit "node server.js")
-	-> mit "node server.js" den Backend-Server starten
+	-> mit "node server.js" oder "nodemon server.js" (automatische Aktualisierung) den Backend-Server starten
 	-> im Browser über localhost:8000 errreichbar 
 	-> JSON Objekte jeweils z.B. über "localhost:8000/api/rooms/all" anzeigen
 
 
-In Konsolenfenster (CMD) im Frontend Ordner öffnen:
-	-> http-server installieren in Backend Konsole per "npm install --global http-server"
-	-> mit "http-server -p 3000 -c-1 --cors" den Frontend-Server starten
+In Visual Studio Code im Frontend Ordner eine Konsole öffnen:
+	-> alle nötigen Module installieren (siehe Fehlermeldung bei Versuch mit "node server.js")
+	-> mit "node app.js" oder "nodemon app.js" (automatische Aktualisierung) den Frontend-Server starten
 	-> im Browser über localhost:3000 alle HTML Seiten erreichbar
