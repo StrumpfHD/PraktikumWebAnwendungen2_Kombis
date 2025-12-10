@@ -15,7 +15,7 @@ class RoomDao {
         const result = stmt.get(id);
 
         if (helper.isUndefined(result))
-            throw new Error('No record found by id=' + id);
+            throw new Error('No room found by id=' + id);
 
         return result;
     }

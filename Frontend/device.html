@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
 
 <body>
@@ -59,122 +60,159 @@
 
     <div id="modalContainerDevice"></div>
 
-    <script type="module">
-        import { openDeleteModal } from './js/delete_modal.js';
-        import { openEditDeviceModal } from './js/edit_device_modal.js';
-        import { initModal } from './js/add_device_modal.js';
+    <script>
+        $(document).ready(function () {
 
-        fetch('add_device_modal.html')
-            .then(res => res.text())
-            .then(html => {
-                document.getElementById('modalContainerDevice').innerHTML = html;
-                initModal('addDeviceModal', loadDevices);
+            const deviceTableBody = $("#deviceTableBody");
 
-                const addBtn = document.getElementById('openAddDeviceBtn');
-                const modalEl = document.getElementById('addDeviceModal');
-                const modalInstance = new bootstrap.Modal(modalEl);
+            const API_ROOMS = "http://localhost:8000/api/rooms/all";
+            const API_DEVICE_TYPES = "http://localhost:8000/api/device_type/all";
+            const API_DEVICES = "http://localhost:8000/api/device/all";
 
-                addBtn.addEventListener('click', () => {
-                    modalInstance.show();
+            let rooms = [];
+            let deviceTypes = [];
+
+            // -----------------------------
+            // Mapping Gerätetyp -> Icon
+            // -----------------------------
+            const typeIcons = {
+                "Licht": "bi-lightbulb",
+                "Heizung": "bi-thermometer-half",
+                "Steckdose": "bi-plug-fill",
+                "Rollladen": "bi-cloud-moon",
+                // weitere Typen hier ergänzen
+            };
+
+            // -----------------------------
+            // Räume + Gerätetypen laden
+            // -----------------------------
+            function preloadData() {
+                const req1 = $.ajax({ url: API_ROOMS, method: "GET", dataType: "json" });
+                const req2 = $.ajax({ url: API_DEVICE_TYPES, method: "GET", dataType: "json" });
+
+                return $.when(req1, req2).done((roomsRes, typesRes) => {
+                    rooms = roomsRes[0];
+                    deviceTypes = typesRes[0];
                 });
-            });
+            }
 
-        async function loadDevices() {
-            try {
-                const resTypes = await fetch('/api/device_types');
-                const deviceTypes = await resTypes.json();
-                const resDevices = await fetch('/api/devices');
-                const devices = await resDevices.json();
-                const container = document.getElementById('deviceTableBody');
-                container.innerHTML = '';
+            function getRoomName(id) {
+                const r = rooms.find(x => x.room_id == id);
+                return r ? r.name : "Unbekannt";
+            }
 
-                deviceTypes.forEach(type => {
-                    const devicesOfType = devices.filter(d => d.device_type_id === type.device_type_id);
-                    if (devicesOfType.length === 0) return;
+            function getDeviceTypeName(id) {
+                const t = deviceTypes.find(x => x.device_type_id == id);
+                return t ? t.name : "Unbekannt";
+            }
 
-                    // Gruppentitel
-                    const trGroup = document.createElement('tr');
-                    trGroup.innerHTML = `<td colspan="5" class="fw-bold bg-light">${type.name}</td>`;
-                    container.appendChild(trGroup);
+            function getDeviceIcon(typeName) {
+                return typeIcons[typeName] || "bi-question-circle";
+            }
 
-                    let counter = 1;
-                    devicesOfType.forEach(device => {
-                        const tr = document.createElement('tr');
+            // -----------------------------
+            // Zustand formatieren nach Gerätetyp
+            // -----------------------------
+            function formatDeviceState(device) {
+                const typeName = getDeviceTypeName(device.device_type_id);
+                switch (typeName) {
+                    case "Licht":
+                    case "Steckdose":
+                        return device.value ? "<span class='badge bg-success'>AN</span>" : "<span class='badge bg-secondary'>AUS</span>";
+                    case "Heizung":
+                        return `<span class="badge bg-info">${device.value.toFixed(1)}°C</span>`;
+                    case "Rollladen":
+                        return `<span class="badge bg-warning">${device.value}%</span>`;
+                    default:
+                        return device.value ? `<span class='badge bg-success'>${device.value}</span>` : "<span class='badge bg-secondary'>Unbekannt</span>";
+                }
+            }
 
-                        const numTd = document.createElement('td');
-                        numTd.textContent = counter++;
-                        tr.appendChild(numTd);
+            // -----------------------------
+            // Geräte laden & nach Typ gruppieren
+            // -----------------------------
+            function loadDevices() {
+                preloadData().then(() => {
+                    $.ajax({
+                        url: API_DEVICES,
+                        method: "GET",
+                        dataType: "json",
+                        cache: false
+                    }).done(function (devices) {
 
-                        const nameTd = document.createElement('td');
-                        nameTd.textContent = device.name;
-                        tr.appendChild(nameTd);
+                        deviceTableBody.empty();
 
-                        const roomTd = document.createElement('td');
-                        roomTd.textContent = device.room_name || '—';
-                        tr.appendChild(roomTd);
+                        // Geräte nach Typ gruppieren
+                        const devicesByType = {};
+                        devices.forEach(d => {
+                            const typeName = getDeviceTypeName(d.device_type_id);
+                            if (!devicesByType[typeName]) devicesByType[typeName] = [];
+                            devicesByType[typeName].push(d);
+                        });
 
-                        const valueTd = document.createElement('td');
-                        valueTd.textContent = device.value + (device.unit ? ' ' + device.unit : '');
-                        tr.appendChild(valueTd);
+                        // Jede Gruppe als Unterüberschrift + Geräte einfügen
+                        Object.keys(devicesByType).forEach(typeName => {
+                            const iconClass = getDeviceIcon(typeName);
 
-                        // Aktionstasten mit Flexbox
-                        const actionTd = document.createElement('td');
-                        actionTd.innerHTML = `
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-primary btn-sm edit-device-btn" title="Bearbeiten">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-danger btn-sm delete-device-btn" title="Löschen">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
+                            // Gruppenüberschrift
+                            const groupHeader = `
+                            <tr class="table-primary">
+                                <td colspan="5">
+                                    <i class="bi ${iconClass} me-2"></i>
+                                    <strong>${typeName}</strong>
+                                </td>
+                            </tr>
                         `;
-                        tr.appendChild(actionTd);
-                        container.appendChild(tr);
+                            deviceTableBody.append(groupHeader);
 
-                        // Eventlistener für Bearbeiten
-                        actionTd.querySelector('.edit-device-btn')?.addEventListener('click', () => {
-                            import('./js/edit_device_modal.js').then(({ openEditDeviceModal }) => {
-                                const currentDevice = device;
-                                openEditDeviceModal(currentDevice, async (updatedDevice) => {
-                                    try {
-                                        const res = await fetch(`/api/devices/${currentDevice.id}`, {
-                                            method: 'PUT',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify(updatedDevice)
-                                        });
+                            // Geräte dieser Gruppe
+                            devicesByType[typeName].forEach(device => {
+                                const stateBadge = formatDeviceState(device);
 
-                                        if (res.ok) {
-                                            loadDevices();
-                                        } else {
-                                            alert('Fehler beim Bearbeiten!');
-                                        }
-                                    } catch (err) {
-                                        console.error(err);
-                                        alert('Serverfehler!');
-                                    }
-                                });
+                                const row = `
+                                <tr>
+                                    <td><i class="bi ${iconClass} fs-4"></i></td>
+                                    <td><strong>${device.name}</strong></td>
+                                    <td>${getRoomName(device.room_id)}</td>
+                                    <td>${stateBadge}</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-primary edit-device-btn" data-id="${device.device_id}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-device-btn" data-id="${device.device_id}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                                deviceTableBody.append(row);
                             });
                         });
 
-                        // Eventlistener für Löschen
-                        actionTd.querySelector('.delete-device-btn')?.addEventListener('click', () => {
-                            openDeleteModal(
-                                `Möchten Sie das Gerät "${device.name}" wirklich löschen?`,
-                                async () => {
-                                    const res = await fetch(`/api/devices/${device.id}`, { method: 'DELETE' });
-                                    if (res.ok) loadDevices();
-                                }
-                            );
-                        });
+                    }).fail(function (xhr) {
+                        console.error("Fehler beim Laden der Geräte:", xhr.responseText);
+                        alert("Fehler beim Laden der Geräte!");
                     });
                 });
-            } catch (err) {
-                console.error(err);
             }
-        }
 
-        window.addEventListener('DOMContentLoaded', loadDevices);
+            // -----------------------------
+            // Edit & Delete Buttons
+            // -----------------------------
+            $(document).on("click", ".edit-device-btn", function () {
+                const id = $(this).data("id");
+                alert("Gerät bearbeiten: " + id);
+            });
+
+            $(document).on("click", ".delete-device-btn", function () {
+                const id = $(this).data("id");
+                alert("Gerät löschen: " + id);
+            });
+
+            // Initial laden
+            loadDevices();
+
+        });
     </script>
 </body>
 

@@ -56,7 +56,8 @@ serviceRouter.put('/rooms/edit/:id', (req, res) => {
 serviceRouter.delete('/rooms/delete/:id', (req, res) => {
     const roomDao = new RoomDao(req.app.locals.dbConnection);
     try {
-        roomDao.delete(req.params.id); res.status(200).json({ gelöscht: true });
+        roomDao.delete(req.params.id); 
+        res.status(200).json({ gelöscht: true });
     } catch (ex) {
         res.status(400).json({ fehler: true, nachricht: ex.message });
     }

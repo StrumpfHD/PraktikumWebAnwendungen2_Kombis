@@ -1,5 +1,5 @@
 // workaround / bugfix for linux systems
-Object.fromEntries = l => l.reduce((a, [k,v]) => ({...a, [k]: v}), {})
+Object.fromEntries = l => l.reduce((a, [k, v]) => ({ ...a, [k]: v }), {})
 
 const helper = require('./helper.js');
 console.log('Starting server...');
@@ -22,7 +22,7 @@ try {
 
     console.log('Creating and configuring Web Server...');
     const app = express();
-    
+
     // provide service router with database connection / store the database connection in global server environment
     app.locals.dbConnection = dbConnection;
 
@@ -32,11 +32,11 @@ try {
     // defining file upload limit
 
     app.use(cors());
-    app.use(bodyParser.urlencoded({ extended: true}));
+    app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
     // setting additional headers
-    app.use(function(request, response, next) {
-        response.setHeader('Access-Control-Allow-Origin', '*'); 
+    app.use(function (request, response, next) {
+        response.setHeader('Access-Control-Allow-Origin', '*');
         response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
         response.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
         next();
@@ -46,18 +46,21 @@ try {
     // binding endpoints
     const TOPLEVELPATH = '/api';
     console.log('Binding enpoints, top level Path at ' + TOPLEVELPATH);
-    
+
     var serviceRouter = require('./services/room.js');
     app.use(TOPLEVELPATH, serviceRouter);
 
-    //serviceRouter = require('./services/adresse.js');
-    //app.use(TOPLEVELPATH, serviceRouter);
+    serviceRouter = require('./services/device.js');
+    app.use(TOPLEVELPATH, serviceRouter);
 
-      
+    serviceRouter = require('./services/deviceType.js');
+    app.use(TOPLEVELPATH, serviceRouter);
+
+
     // send default error message if no matching endpoint found
     app.use(function (request, response) {
         console.log('Error occured, 404, resource not found');
-        response.status(404).json({'fehler': true, 'nachricht': 'Ressource nicht gefunden'});
+        response.status(404).json({ 'fehler': true, 'nachricht': 'Ressource nicht gefunden' });
     });
 
 
