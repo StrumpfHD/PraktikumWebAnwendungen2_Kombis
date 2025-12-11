@@ -5,3 +5,6 @@
 # Allgemeine Datenbank-Dateien ignorieren
 *.db
 *.db3
+
+# Unsere DB im speziellen ignorieren
+Smart_Home_Dashboard.sqlite
