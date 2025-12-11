@@ -43,7 +43,7 @@
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card shadow-sm p-3 rounded-4 text-center">
                 <h5 class="card-title">Stromverbrauch</h5>
-                <h2 class="text-primary mb-0">12,4 kWh</h2>
+                <h2 id="kpiConsumption" class="text-primary mb-0">--</h2>
                 <small>heute</small>
             </div>
         </div>
@@ -51,7 +51,7 @@
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card shadow-sm p-3 rounded-4 text-center">
                 <h5 class="card-title">Solarertrag</h5>
-                <h2 class="text-success mb-0">17,8 kWh</h2>
+                <h2 id="kpiGeneration" class="text-success mb-0">--</h2>
                 <small>heute</small>
             </div>
         </div>
@@ -59,7 +59,7 @@
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card shadow-sm p-3 rounded-4 text-center">
                 <h5 class="card-title">Bilanz</h5>
-                <h2 class="text-success mb-0">+5,4 kWh</h2>
+                <h2 id="kpiBalance"     class="text-success mb-0">--</h2>
                 <small>Überschuss</small>
             </div>
         </div>
@@ -90,17 +90,12 @@
         <h3 class="card-title mb-0">Verbrauch pro Steckdose (7 Tage)</h3>
         <div class="dropdown mt-2 mt-md-0">
             <button id="dropdownOutlet" class="btn btn-primary dropdown-toggle" type="button"
-            data-bs-toggle="dropdown" aria-expanded="false">
-            Steckdose auswählen
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownOutlet">
-            <li><a class="dropdown-item" href="#" data-outlet="living_tv">Steckdose Wohnzimmer</a></li>
-            <li><a class="dropdown-item" href="#" data-outlet="sofa_strip">Sofa-Ladeleiste</a></li>
-            <li><a class="dropdown-item" href="#" data-outlet="thermomix">Steckdose Thermomix</a></li>
-            <li><a class="dropdown-item" href="#" data-outlet="coffee">Steckdose Kaffeemaschine</a></li>
-            <li><a class="dropdown-item" href="#" data-outlet="toothbrush">Steckdose Zahnbürste</a></li>
-            <li><a class="dropdown-item" href="#" data-outlet="washer">Steckdose Waschmaschine</a></li>
-        </ul>
+          data-bs-toggle="dropdown" aria-expanded="false">
+    Steckdose auswählen
+  </button>
+  <ul class="dropdown-menu" id="outletDropdownMenu" aria-labelledby="dropdownOutlet">
+    <!-- JS füllt das dynamisch -->
+  </ul>
     </div>
 </div>
 <canvas id="chartOutlet" height="400"></canvas>
@@ -111,116 +106,210 @@
 
 
 <script>
-    // Dropdown-Label (allgemein)
-    document.querySelectorAll('.dropdown-item').forEach(item => {
-        item.addEventListener('click', (ev) => {
-            const btn = ev.target.closest('.dropdown').querySelector('.dropdown-toggle');
-            btn.textContent = ev.target.textContent;
-        });
-    });
-    
-    // ------- MOCK-DATEN für Verbrauch/Ertrag -------
-    function labelsFor(range) {
-        if (range === 'week') return ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-        if (range === 'month') return Array.from({ length: 30 }, (_, i) => `${i + 1}.`);
-        if (range === 'year') return ['Jan', 'Feb', 'Mrz', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-        return [];
+  const API_BASE = 'http://localhost:8000/api';
+
+  // ---------- Chart-Variablen ----------
+  let energyChart = null;
+  let outletChart = null;
+
+  // Dropdown-Label (für alle Dropdowns)
+  document.addEventListener('click', (ev) => {
+    if (ev.target.classList.contains('dropdown-item')) {
+      const btn = ev.target.closest('.dropdown').querySelector('.dropdown-toggle');
+      if (btn) {
+        btn.textContent = ev.target.textContent;
+      }
     }
-    
-    function mockEnergy(range) {
-        const n = range === 'week' ? 7 : (range === 'month' ? 30 : 12);
-        const consumption = Array.from({ length: n }, (_, i) =>
-        +(3.2 + Math.sin(i / 2) * 0.6 + Math.random() * 0.4).toFixed(2)
-        );
-        const solar = Array.from({ length: n }, (_, i) =>
-        +(3.5 + Math.cos(i / 3) * 0.8 + Math.random() * 0.5).toFixed(2)
-        );
-        return { labels: labelsFor(range), consumption, solar };
-    }
-    
-    // ------- Chart initialisieren (Standard: Woche) -------
+  });
+
+  async function loadTodayValues() {
+  try {
+    const res = await fetch(`${API_BASE}/energy/today`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const json = await res.json();
+    if (json.error || !json.data) throw new Error(json.message || 'No data');
+
+    const { consumption, generation, balance } = json.data;
+
+    document.getElementById('kpiConsumption').textContent = consumption.toFixed(2) + " kWh";
+    document.getElementById('kpiGeneration').textContent  = generation.toFixed(2) + " kWh";
+
+    const balanceEl = document.getElementById('kpiBalance');
+    balanceEl.textContent = (balance >= 0 ? "+" : "") + balance.toFixed(2) + " kWh";
+
+    // Farbe dynamisch setzen
+    balanceEl.classList.remove('text-success', 'text-danger');
+    balanceEl.classList.add(balance >= 0 ? 'text-success' : 'text-danger');
+
+  } catch (err) {
+    console.error("Fehler beim Laden der KPI-Werte:", err);
+  }
+}
+
+
+  // ---------- OBERER CHART: Verbrauch vs. Ertrag (aus Backend) ----------
+  async function loadEnergySummary(range = 'week') {
+  try {
+    const res = await fetch(`${API_BASE}/energy/summary/${range}`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const json = await res.json();
+    if (json.error || !json.data) throw new Error(json.message || 'No data');
+
+    const { labels, consumption, generation } = json.data;
     const ctxEnergy = document.getElementById('chartEnergy');
-    const initial = mockEnergy('week');
-    
-    const energyChart = new Chart(ctxEnergy, {
+
+    if (!energyChart) {
+      energyChart = new Chart(ctxEnergy, {
         type: 'line',
         data: {
-            labels: initial.labels,
-            datasets: [
-            { label: 'Verbrauch (kWh)', data: initial.consumption, borderColor: '#0d6efd', tension: 0.3 },
-            { label: 'Solarertrag (kWh)', data: initial.solar, borderColor: '#198754', tension: 0.3 }
-            ]
+          labels,
+          datasets: [
+            {
+              label: 'Verbrauch (kWh)',
+              data: consumption,
+              borderColor: '#0d6efd',
+              tension: 0.3
+            },
+            {
+              label: 'Solarertrag (kWh)',
+              data: generation,
+              borderColor: '#198754',
+              tension: 0.3
+            }
+          ]
         },
         options: {
-            responsive: true,
-            plugins: { legend: { position: 'bottom' } },
-            interaction: { mode: 'index', intersect: false }
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } },
+          interaction: { mode: 'index', intersect: false }
         }
-    });
-    
-    // ------- Zeitraum-Dropdown: Chart updaten -------
-    document.querySelectorAll('#dropdownTime + .dropdown-menu .dropdown-item')
+      });
+    } else {
+      energyChart.data.labels = labels;
+      energyChart.data.datasets[0].data = consumption;
+      energyChart.data.datasets[1].data = generation;
+      energyChart.update();
+    }
+  } catch (err) {
+    console.error('Fehler beim Laden der Energie-Statistik:', err);
+  }
+}
+
+  
+
+
+
+  // Zeitraum-Dropdown (UI, Backend noch immer nur "week")
+  document.querySelectorAll('#dropdownTime + .dropdown-menu .dropdown-item')
     .forEach(a => a.addEventListener('click', () => {
-        const range = a.dataset.range; // 'week' | 'month' | 'year'
-        const d = mockEnergy(range);
-        energyChart.data.labels = d.labels;
-        energyChart.data.datasets[0].data = d.consumption;
-        energyChart.data.datasets[1].data = d.solar;
-        energyChart.update();
+      const range = a.dataset.range || 'week';
+      loadEnergySummary(range);
     }));
-    
-    
 
-        // ------- MOCK-DATEN für Verbrauch/Ertrag -------
-    const outletLabels = ['Mo','Di','Mi','Do','Fr','Sa','So'];
-    
-    // Mock-Daten je Steckdose (kWh/Tag, 7 Werte)
-    const outletSeries = {
-        'Steckdose Wohnzimmer':     [1.2, 1.0, 1.3, 1.1, 1.5, 1.4, 1.2],
-        'Sofa-Ladeleiste':          [0.4, 0.35, 0.5, 0.45, 0.55, 0.4, 0.5],
-        'Steckdose Thermomix':      [0.0, 0.9, 0.0, 0.0, 1.0, 0.0, 0.0],
-        'Steckdose Kaffeemaschine': [0.3, 0.25, 0.4, 0.35, 0.45, 0.3, 0.4],
-        'Steckdose Zahnbürste':     [0.05,0.05,0.05,0.05,0.05,0.05,0.05],
-        'Steckdose Waschmaschine':  [0.0, 1.3, 0.0, 0.0, 0.0, 1.5, 0.0]
-    };
-    
+  // ---------- UNTERER CHART: Steckdosen dynamisch ----------
 
-    let currentOutlet = 'Steckdose Wohnzimmer';
+  async function loadOutletDevices() {
+    try {
+      const res = await fetch(`${API_BASE}/energy/devices`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      if (json.error || !json.data) throw new Error(json.message || 'No data');
 
-    const ctxOutlet = document.getElementById('chartOutlet');
-    const outletChart = new Chart(ctxOutlet, {
-        type: 'line',
-        data: {
-            labels: outletLabels,
-            datasets: [{
-                label: currentOutlet,
-                data: outletSeries[currentOutlet],
+      const devices = json.data; // [{device_id, name}, ...]
+      const menu = document.getElementById('outletDropdownMenu');
+      const btn = document.getElementById('dropdownOutlet');
+
+      menu.innerHTML = '';
+
+      devices.forEach((dev, index) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.className = 'dropdown-item';
+        a.href = '#';
+        a.textContent = dev.name;
+        a.dataset.deviceId = dev.device_id;
+        li.appendChild(a);
+        menu.appendChild(li);
+
+        a.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          btn.textContent = dev.name;
+          loadOutletEnergy(dev.device_id);
+        });
+
+        // beim ersten Gerät direkt laden
+        if (index === 0) {
+          btn.textContent = dev.name;
+          loadOutletEnergy(dev.device_id);
+        }
+      });
+
+    } catch (err) {
+      console.error('Fehler beim Laden der Outlet-Geräte:', err);
+    }
+  }
+
+  async function loadOutletEnergy(deviceId) {
+    try {
+      const res = await fetch(`${API_BASE}/energy/device/${deviceId}/week`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      if (json.error || !json.data) throw new Error(json.message || 'No data');
+
+      const { labels, consumption, generation } = json.data;
+      const ctxOutlet = document.getElementById('chartOutlet');
+
+      if (!outletChart) {
+        outletChart = new Chart(ctxOutlet, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Verbrauch (kWh)',
+                data: consumption,
                 borderColor: '#0d6efd',
                 tension: 0.3
-            }]
-        },
-        options: {
+              },
+              {
+                label: 'Solarertrag (kWh)',
+                data: generation,
+                borderColor: '#198754',
+                tension: 0.3
+              }
+            ]
+          },
+          options: {
             responsive: true,
             plugins: { legend: { position: 'bottom' } },
             interaction: { mode: 'index', intersect: false },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'kWh pro Tag' }
-                }
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: 'kWh pro Tag' }
+              }
             }
-        }
-    });
-    
-    // Dropdown für Steckdose mit vorhandenen Steckdosen
-    document.querySelectorAll('#dropdownOutlet + .dropdown-menu .dropdown-item')
-    .forEach(a => a.addEventListener('click', () => {
-        const name = a.textContent.trim(); 
-        if (!outletSeries[name]) return;
-        currentOutlet = name;
-        outletChart.data.datasets[0].label = currentOutlet;
-        outletChart.data.datasets[0].data  = outletSeries[currentOutlet];
+          }
+        });
+      } else {
+        outletChart.data.labels = labels;
+        outletChart.data.datasets[0].data = consumption;
+        outletChart.data.datasets[1].data = generation;
         outletChart.update();
-    }));
-    
+      }
+    } catch (err) {
+      console.error('Fehler beim Laden der Steckdosen-Statistik:', err);
+    }
+  }
+
+  // ---------- Initial-Load ----------
+  document.addEventListener('DOMContentLoaded', () => {
+  loadTodayValues();
+  loadEnergySummary('week');
+  loadOutletDevices();
+});
+
 </script>
+
