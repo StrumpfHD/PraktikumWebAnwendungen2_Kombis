@@ -69,8 +69,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Erfolgsmeldung -->
-                    <div id="addDeviceSuccess" class="alert alert-success d-none">Gerät erfolgreich hinzugefügt!</div>
+                    <div id="addDeviceModalAlert" class="alert d-none"></div>
                     <div class="card border-0">
                         <div class="card-body">
                             <!-- Räume -->
@@ -146,60 +145,100 @@
         </div>
     </div>
 
+    <!-- Modal zum Bearbeiten eines Gerätes -->
+    <div class="modal fade" id="editDeviceModal" tabindex="-1" aria-labelledby="editDeviceModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="editDeviceModalLabel">Gerät bearbeiten</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="editDeviceModalAlert" class="alert d-none"></div>
+                    <div class="card border-0">
+                        <div class="card-body">
+                            <!-- Räume -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Raum</label>
+                                <select id="editDeviceRoom" class="form-select">
+                                    <option disabled selected>Bitte Raum auswählen...</option>
+                                </select>
+                            </div>
+                            <!-- Gerätetyp -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Geräteart</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="editTypeHeizung"
+                                        name="editDeviceType" value="Heizung">
+                                    <label class="form-check-label" for="editTypeHeizung">Heizung</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="editTypeLicht"
+                                        name="editDeviceType" value="Licht">
+                                    <label class="form-check-label" for="editTypeLicht">Licht</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="editTypeRollladen"
+                                        name="editDeviceType" value="Rollladen">
+                                    <label class="form-check-label" for="editTypeRollladen">Rollladen</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="editTypeSteckdose"
+                                        name="editDeviceType" value="Steckdose">
+                                    <label class="form-check-label" for="editTypeSteckdose">Steckdose</label>
+                                </div>
+                            </div>
+                            <!-- Gerätename -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Gerätename</label>
+                                <input type="text" id="editDeviceName" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="button" class="btn btn-primary" id="updateDeviceBtn">Änderungen speichern</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function () {
-
             let deviceIdToDelete = null;
 
             const deleteDeviceModal = new bootstrap.Modal(document.getElementById("deleteDeviceModal"));
             const addDeviceModal = new bootstrap.Modal(document.getElementById("addDeviceModal"));
-
             const deviceTableBody = $("#deviceTableBody");
+
+            let editDeviceModal = new bootstrap.Modal(document.getElementById("editDeviceModal"));
+            let currentEditDeviceId = null;
 
             let rooms = [];
             let deviceTypes = [];
 
-            // ---------------------------------------------------
-            // Alerts
-            // ---------------------------------------------------
-            function showDeviceDeleteAlert(type, message) {
-                const el = $("#deleteDeviceAlert");
-                el.removeClass("d-none alert-success alert-danger")
-                    .addClass("alert-" + type)
-                    .text(message);
-            }
-
             // -----------------------------
             // Modal Alert Funktion
             // -----------------------------
-            function showModalAlert(type, message, selector = '#modalAlert') {
+            function showModalAlert(type, message, selector = '#addDeviceModalAlert') {
                 const alertBox = $(selector);
-                alertBox
-                    .removeClass('d-none alert-success alert-danger alert-warning')
+                alertBox.removeClass('d-none alert-success alert-danger alert-warning')
                     .addClass(`alert alert-${type}`)
                     .text(message);
 
-                setTimeout(() => {
-                    alertBox.addClass('d-none');
-                }, 3000);
+                setTimeout(() => alertBox.addClass('d-none'), 3000);
             }
 
-            // ---------------------------------------------------
-            // Daten Vorladen
-            // ---------------------------------------------------
+            // -----------------------------
+            // Vorladen der Räume & Gerätetypen
+            // -----------------------------
             function preloadData() {
-                const req1 = $.ajax({
-                    url: 'http://localhost:8000/api/rooms/all',
-                    method: "GET",
-                    dataType: "json"
-                });
-                const req2 = $.ajax({
-                    url: 'http://localhost:8000/api/device_type/all',
-                    method: "GET",
-                    dataType: "json"
-                });
-
-                return $.when(req1, req2).done((roomsRes, typesRes) => {
+                return $.when(
+                    $.ajax({ url: 'http://localhost:8000/api/rooms/all', method: "GET", dataType: "json" }),
+                    $.ajax({ url: 'http://localhost:8000/api/device_type/all', method: "GET", dataType: "json" })
+                ).done((roomsRes, typesRes) => {
                     rooms = roomsRes[0];
                     deviceTypes = typesRes[0];
                 });
@@ -227,8 +266,7 @@
                 switch (typeName) {
                     case "Licht":
                     case "Steckdose":
-                        const isOn = String(device.value).toLowerCase() === "on";
-                        return isOn
+                        return String(device.value).toLowerCase() === "on"
                             ? "<span class='badge bg-success'>AN</span>"
                             : "<span class='badge bg-danger'>AUS</span>";
                     case "Heizung":
@@ -243,21 +281,18 @@
                 }
             }
 
-            // ---------------------------------------------------
+            // -----------------------------
             // Geräte laden
-            // ---------------------------------------------------
+            // -----------------------------
             function loadDevices() {
                 preloadData().then(() => {
-
                     $.ajax({
                         url: 'http://localhost:8000/api/device/all',
                         method: "GET",
                         dataType: "json"
                     }).done(devices => {
-
                         deviceTableBody.empty();
 
-                        // Nach Typ gruppieren
                         const grouped = {};
                         devices.forEach(d => {
                             const typeName = getDeviceTypeName(d.device_type_id);
@@ -267,138 +302,215 @@
 
                         Object.keys(grouped).forEach(typeName => {
                             const icon = typeIcons[typeName] || "bi-question-circle";
+                            deviceTableBody.append(`<tr class="table-primary"><td colspan="5"><strong>${typeName}</strong></td></tr>`);
 
-                            // Gruppenüberschrift
-                            deviceTableBody.append(`
-                        <tr class="table-primary">
-                            <td colspan="5"><strong>${typeName}</strong></td>
-                        </tr>
-                    `);
-
-                            // Geräte einfügen
                             grouped[typeName].forEach(device => {
-
                                 const row = `
-                            <tr>
-                                <td><i class="bi ${icon} fs-4"></i></td>
-                                <td><strong>${device.name}</strong></td>
-                                <td>${getRoomName(device.room_id)}</td>
-                                <td>${formatDeviceState(device)}</td>
-                                <td class="text-end">
-                                    <button class="btn btn-sm btn-primary edit-device-btn" data-id="${device.device_id}">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger delete-device-btn" data-id="${device.device_id}">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-
+                                <tr>
+                                    <td><i class="bi ${icon} fs-4"></i></td>
+                                    <td><strong>${device.name}</strong></td>
+                                    <td>${getRoomName(device.room_id)}</td>
+                                    <td>${formatDeviceState(device)}</td>
+                                    <td class="text-end">
+                                        <div class="d-flex gap-1">
+                                            <button class="btn btn-sm btn-primary edit-device-btn" data-id="${device.device_id}">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger delete-device-btn" data-id="${device.device_id}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>`;
                                 deviceTableBody.append(row);
                             });
                         });
-
                     });
                 });
             }
 
-            // ---------------------------------------------------
-            // Gerät hinzufügen
-            // ---------------------------------------------------
+            // -----------------------------
+            // Räume für Modal laden
+            // -----------------------------
             function loadRoomsForModal() {
-                return $.ajax({
-                    url: 'http://localhost:8000/api/rooms/all',
-                    method: "GET",
-                    dataType: "json"
-                }).done(data => {
-                    const select = $("#addDeviceRoom");
-                    select.empty();
-                    select.append(`<option disabled selected>Bitte Raum auswählen...</option>`);
-
-                    data.forEach(room => {
-                        select.append(`<option value="${room.room_id}">${room.name}</option>`);
-                    });
-                });
+                const select = $("#addDeviceRoom");
+                select.empty().append(`<option disabled selected>Bitte Raum auswählen...</option>`);
+                rooms.forEach(room => select.append(`<option value="${room.room_id}">${room.name}</option>`));
             }
 
+            // -----------------------------
+            // Add Device Modal öffnen
+            // -----------------------------
             $("#openAddDeviceBtn").on("click", function () {
-                loadRoomsForModal().then(() => {
-                    $("#addDeviceSuccess").addClass("d-none");
-                    $("#addDeviceName").val("");
-                    $("input[name='deviceType']").prop("checked", false);
-                    addDeviceModal.show();
-                });
+                loadRoomsForModal();
+                $("#addDeviceName").val("");
+                $("input[name='deviceType']").prop("checked", false);
+                addDeviceModal.show();
             });
 
+            // -----------------------------
+            // Gerät hinzufügen
+            // -----------------------------
             $("#saveDeviceBtn").on("click", function () {
-
                 const roomId = $("#addDeviceRoom").val();
-                const deviceName = $("#addDeviceName").val();
+                const deviceName = $("#addDeviceName").val().trim();
                 const typeName = $("input[name='deviceType']:checked").val();
 
-                if (!roomId || !deviceName || !typeName) {
-                    showModalAlert('warning', 'Bitte einen Raum auswählen!', '#editModalAlert');
+                if (!roomId) {
+                    showModalAlert('warning', 'Bitte einen Raum auswählen!', '#addDeviceModalAlert');
+                    return;
+                }
+                if (!typeName) {
+                    showModalAlert('warning', 'Bitte einen Gerätetyp auswählen!', '#addDeviceModalAlert');
+                    return;
+                }
+                if (!deviceName) {
+                    showModalAlert('warning', 'Bitte einen Gerätenamen eingeben!', '#addDeviceModalAlert');
                     return;
                 }
 
+                $.ajax({ url: 'http://localhost:8000/api/device/all', method: 'GET', dataType: 'json' })
+                    .done(devices => {
+                        const exists = devices.some(d => d.name.toLowerCase() === deviceName.toLowerCase() && d.room_id == roomId);
+                        if (exists) return showModalAlert('warning', `Das Gerät "${deviceName}" existiert in diesem Raum bereits!`, '#addDeviceModalAlert');
+
+                        const typeObj = deviceTypes.find(t => t.name === typeName);
+
+                        let defaultValue;
+                        switch (typeName) {
+                            case "Licht":
+                            case "Steckdose":
+                                defaultValue = "off";
+                                break;
+                            case "Heizung":
+                                defaultValue = 22.0;
+                                break;
+                            case "Rollladen":
+                                defaultValue = 50;
+                                break;
+                            default:
+                                defaultValue = null;
+                        }
+
+                        $.ajax({
+                            url: "http://localhost:8000/api/device/new",
+                            method: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify({ room_id: roomId, device_type_id: typeObj.device_type_id, name: deviceName, value: defaultValue })
+                        }).done(() => {
+                            showModalAlert('success', `Neues Gerät "${deviceName}" wurde hinzugefügt!`, '#addDeviceModalAlert');
+                            setTimeout(() => { addDeviceModal.hide(); loadDevices(); }, 1500);
+                        });
+                    });
+            });
+
+            // -----------------------------
+            // Gerät löschen
+            // -----------------------------
+            $(document).on("click", ".delete-device-btn", function () {
+                deviceIdToDelete = $(this).data("id");
+                const deviceName = $(this).closest("tr").find("td:nth-child(2)").text().trim();
+                $("#deleteDeviceText").text(`Möchten Sie das Gerät "${deviceName}" wirklich löschen?`);
+                deleteDeviceModal.show();
+            });
+
+            $("#confirmDeleteDeviceBtn").on("click", function () {
+                if (!deviceIdToDelete) return;
+                $.ajax({ url: `http://localhost:8000/api/device/delete/${deviceIdToDelete}`, method: "DELETE" })
+                    .done(() => { loadDevices(); deleteDeviceModal.hide(); deviceIdToDelete = null; })
+                    .fail(() => showModalAlert('danger', 'Fehler beim Löschen!', '#deleteDeviceAlert'));
+            });
+
+            // --------------------------------------------------
+            // Gerät bearbeiten Modal öffnen
+            // --------------------------------------------------
+            $(document).on("click", ".edit-device-btn", function () {
+                currentEditDeviceId = $(this).data("id");
+
+                // 🔥 WICHTIG: Räume + Typen sicher laden, BEVOR das Modal befüllt wird
+                preloadData().then(() => {
+                    $.ajax({
+                        url: `http://localhost:8000/api/device/get/${currentEditDeviceId}`,
+                        method: "GET",
+                        dataType: "json"
+                    }).done(device => {
+
+                        // Räume laden
+                        const roomSelect = $("#editDeviceRoom");
+                        roomSelect.empty().append(`<option disabled>Bitte Raum auswählen...</option>`);
+                        rooms.forEach(r => {
+                            roomSelect.append(`<option value="${r.room_id}">${r.name}</option>`);
+                        });
+
+                        // Raum vorauswählen
+                        $("#editDeviceRoom").val(device.room_id);
+
+                        // Gerätetyp vorauswählen
+                        const typeName = getDeviceTypeName(device.device_type_id);
+                        $(`input[name='editDeviceType'][value='${typeName}']`).prop("checked", true);
+
+                        // Name setzen
+                        $("#editDeviceName").val(device.name);
+
+                        // Modal öffnen
+                        editDeviceModal.show();
+                    });
+                });
+            });
+
+            $("#updateDeviceBtn").on("click", function () {
+
+                const roomId = $("#editDeviceRoom").val();
+                const typeName = $("input[name='editDeviceType']:checked").val();
+                const deviceName = $("#editDeviceName").val().trim();
+
+                if (!roomId) return showModalAlert('warning', 'Bitte Raum auswählen!', '#editDeviceModalAlert');
+                if (!typeName) return showModalAlert('warning', 'Bitte Gerätetyp auswählen!', '#editDeviceModalAlert');
+                if (!deviceName) return showModalAlert('warning', 'Bitte Gerätenamen eingeben!', '#editDeviceModalAlert');
+
                 const typeObj = deviceTypes.find(t => t.name === typeName);
 
+                // ⬇⬇⬇ WICHTIG: DEFAULT-WERT NEU SETZEN JE NACH TYP (Lösung C)
+                let newDefaultValue;
+
+                switch (typeName) {
+                    case "Licht":
+                    case "Steckdose":
+                        newDefaultValue = "off";
+                        break;
+                    case "Heizung":
+                        newDefaultValue = 22.0;
+                        break;
+                    case "Rollladen":
+                        newDefaultValue = 50;
+                        break;
+                    default:
+                        newDefaultValue = null;
+                }
+
                 $.ajax({
-                    url: "http://localhost:8000/api/device/new",
-                    method: "POST",
+                    url: `http://localhost:8000/api/device/edit/${currentEditDeviceId}`,
+                    method: "PUT",
                     contentType: "application/json",
                     data: JSON.stringify({
                         room_id: roomId,
                         device_type_id: typeObj.device_type_id,
                         name: deviceName,
-                        value: "off"
+                        value: newDefaultValue       //  ⬅⬅⬅ HIER IST LÖSUNG C
                     })
                 }).done(() => {
-                    $("#addDeviceSuccess").removeClass("d-none");
+                    showModalAlert('success', 'Änderungen gespeichert!', '#editDeviceModalAlert');
 
                     setTimeout(() => {
-                        addDeviceModal.hide();
+                        editDeviceModal.hide();
                         loadDevices();
-                    }, 800);
+                    }, 1200);
                 });
             });
-
-            // ---------------------------------------------------
-            // DELETE DEVICE
-            // ---------------------------------------------------
-            $(document).on("click", ".delete-device-btn", function () {
-                deviceIdToDelete = $(this).data("id");
-
-                const deviceName = $(this).closest("tr").find("td:nth-child(2)").text().trim();
-
-                $("#deleteDeviceText").text(`Möchten Sie das Gerät "${deviceName}" wirklich löschen?`);
-                $("#deleteDeviceAlert").addClass("d-none");
-
-                deleteDeviceModal.show();
-            });
-
-            $("#confirmDeleteDeviceBtn").click(function () {
-                if (!deviceIdToDelete) return;
-
-                $.ajax({
-                    url: `http://localhost:8000/api/device/delete/${deviceIdToDelete}`,
-                    method: "DELETE"
-                }).done(() => {
-                    showDeviceDeleteAlert("success", "Gerät wurde erfolgreich gelöscht!");
-
-                    setTimeout(() => {
-                        deleteDeviceModal.hide();
-                        loadDevices();
-                    }, 900);
-                });
-            });
-
-            // ---------------------------------------------------
-            // INITIAL LOAD
-            // ---------------------------------------------------
+            // -----------------------------
+            // Initial laden
+            // -----------------------------
             loadDevices();
-
         });
     </script>
 

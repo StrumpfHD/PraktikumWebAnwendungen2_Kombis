@@ -63,4 +63,15 @@ serviceRouter.delete('/rooms/delete/:id', (req, res) => {
     }
 });
 
+// Alle Geräte in einem Raum
+serviceRouter.get('/rooms/:id/devices', (req, res) => {
+    const roomDao = new RoomDao(req.app.locals.dbConnection);
+    try {
+        const devices = roomDao.loadDevicesForRoom(req.params.id);
+        res.status(200).json(devices);
+    } catch (ex) {
+        res.status(500).json({ fehler: true, nachricht: ex.message });
+    }
+});
+
 module.exports = serviceRouter;
