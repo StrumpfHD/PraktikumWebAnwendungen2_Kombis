@@ -69,6 +69,20 @@ class RoomDao {
         return true;
     }
 
+    loadDevicesForRoom(roomId) {
+    const sql = `
+        SELECT *
+        FROM device
+        WHERE room_id = ?
+        ORDER BY name ASC
+    `;
+    const stmt = this._conn.prepare(sql);
+    const result = stmt.all(roomId);
+
+    return helper.isArrayEmpty(result) ? [] : result;
+}
+
+
     toString() {
         console.log('RoomDao [_conn=' + this._conn + ']');
     }

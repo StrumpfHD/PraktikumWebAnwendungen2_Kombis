@@ -173,27 +173,43 @@
                     dataType: 'json',
                     cache: false
                 }).done(function (rooms) {
+
                     rooms.forEach(room => {
+
                         const item = $(`
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="room_${room.name.toLowerCase()}.html" class="text-decoration-none text-dark flex-grow-1">
-                            <div class="d-flex align-items-center">
-                                <h4 class="mb-0 me-2">${room.name}</h4>
-                                <span class="badge bg-secondary">0 Geräte</span>
-                            </div>
-                        </a>
-                        <div class="d-flex gap-1">
-                            <button class="btn btn-primary btn-sm edit-room-btn" data-id="${room.room_id}" title="Bearbeiten">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm delete-room-btn" data-id="${room.room_id}" title="Löschen">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="room_${room.name.toLowerCase()}.html" class="text-decoration-none text-dark flex-grow-1">
+                        <div class="d-flex align-items-center">
+                            <h4 class="mb-0 me-2">${room.name}</h4>
+                            <span class="badge bg-secondary">Lade...</span>
                         </div>
+                    </a>
+
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-primary btn-sm edit-room-btn" data-id="${room.room_id}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-room-btn" data-id="${room.room_id}">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </div>
-                `);
+                </div>
+            `);
+
                         container.append(item);
+
+                        // Geräte für diesen Raum laden
+                        $.ajax({
+                            url: `http://localhost:8000/api/rooms/${room.room_id}/devices`,
+                            method: 'GET'
+                        }).done(function (devices) {
+                            item.find('.badge').text(`${devices.length} Geräte`);
+                        }).fail(() => {
+                            item.find('.badge').text(`0 Geräte`);
+                        });
+
                     });
+
                 }).fail(function (jqXHR) {
                     console.error('Fehler beim Laden der Räume:', jqXHR.responseText);
                     alert('Fehler beim Laden der Räume!');
