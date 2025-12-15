@@ -2,28 +2,32 @@
 const helper = require('../helper.js');
 
 class EnergyDataDao {
-    constructor(dbConnection) {
-        this._conn = dbConnection;
-    }
+  constructor(dbConnection) {
+    this._conn = dbConnection;
+  }
 
-    getConnection() {
-        return this._conn;
-    }
+  getConnection() {
+    return this._conn;
+  }
 
-    loadDevicesWithEnergy() {
-      const sql = `
-        SELECT DISTINCT d.device_id, d.name
-        FROM energy_data e
-        JOIN device d ON d.device_id = e.device_id
-        ORDER BY d.name
+  loadDevicesWithEnergy() {
+    const sql = `
+        SELECT d.device_id, d.name
+        FROM device d
+        WHERE EXISTS (
+          SELECT 1
+          FROM energy_data e
+          WHERE e.device_id = d.device_id
+        )
+        ORDER BY d.name;
       `;
-      const stmt = this._conn.prepare(sql);
-      const result = stmt.all();
-      return helper.isArrayEmpty(result) ? [] : result;
-    }
+    const stmt = this._conn.prepare(sql);
+    const result = stmt.all();
+    return helper.isArrayEmpty(result) ? [] : result;
+  }
 
-    loadSummaryLast7Days() {
-      const sql = `
+  loadSummaryLast7Days() {
+    const sql = `
         WITH max_day AS (
           SELECT date(MAX(timestamp)) AS d
           FROM energy_data
@@ -37,14 +41,14 @@ class EnergyDataDao {
         GROUP BY date(timestamp)
         ORDER BY date(timestamp)
       `;
-      const stmt = this._conn.prepare(sql);
-      const result = stmt.all();
-      return helper.isArrayEmpty(result) ? [] : result;
-    }
+    const stmt = this._conn.prepare(sql);
+    const result = stmt.all();
+    return helper.isArrayEmpty(result) ? [] : result;
+  }
 
-    // 🔹 NEU: letzte 30 Tage
-    loadSummaryLast30Days() {
-      const sql = `
+  // 🔹 NEU: letzte 30 Tage
+  loadSummaryLast30Days() {
+    const sql = `
         WITH max_day AS (
           SELECT date(MAX(timestamp)) AS d
           FROM energy_data
@@ -58,14 +62,13 @@ class EnergyDataDao {
         GROUP BY date(timestamp)
         ORDER BY date(timestamp)
       `;
-      const stmt = this._conn.prepare(sql);
-      const result = stmt.all();
-      return helper.isArrayEmpty(result) ? [] : result;
-    }
+    const stmt = this._conn.prepare(sql);
+    const result = stmt.all();
+    return helper.isArrayEmpty(result) ? [] : result;
+  }
 
-    // 🔹 NEU: letzte 365 Tage
-    loadSummaryLast365Days() {
-      const sql = `
+  loadSummaryLast365Days() {
+    const sql = `
         WITH max_day AS (
           SELECT date(MAX(timestamp)) AS d
           FROM energy_data
@@ -79,17 +82,17 @@ class EnergyDataDao {
         GROUP BY date(timestamp)
         ORDER BY date(timestamp)
       `;
-      const stmt = this._conn.prepare(sql);
-      const result = stmt.all();
-      return helper.isArrayEmpty(result) ? [] : result;
+    const stmt = this._conn.prepare(sql);
+    const result = stmt.all();
+    return helper.isArrayEmpty(result) ? [] : result;
+  }
+
+  loadDeviceLast7Days(deviceId) {
+    if (!helper.isNumeric(deviceId)) {
+      throw new Error('deviceId must be numeric');
     }
 
-    loadDeviceLast7Days(deviceId) {
-      if (!helper.isNumeric(deviceId)) {
-        throw new Error('deviceId must be numeric');
-      }
-
-      const sql = `
+    const sql = `
         WITH max_day AS (
           SELECT date(MAX(timestamp)) AS d
           FROM energy_data
@@ -105,18 +108,14 @@ class EnergyDataDao {
         GROUP BY date(timestamp)
         ORDER BY date(timestamp)
       `;
-      const stmt = this._conn.prepare(sql);
-      const result = stmt.all(deviceId, deviceId);
-      return helper.isArrayEmpty(result) ? [] : result;
-    }
+    const stmt = this._conn.prepare(sql);
+    const result = stmt.all(deviceId, deviceId);
+    return helper.isArrayEmpty(result) ? [] : result;
+  }
 
-    toString() {
-        console.log('EnergyDataDao [_conn=' + this._conn + ']');
-    }
+  toString() {
+    console.log('EnergyDataDao [_conn=' + this._conn + ']');
+  }
 }
 
-module.exports = EnergyDataDao;
-
-
-// ❗WICHTIG: genau so exportieren
 module.exports = EnergyDataDao;

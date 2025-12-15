@@ -21,7 +21,7 @@ class DeviceDao {
     }
 
     loadAll() {
-        const sql = 'SELECT * FROM device ORDER BY name ASC';
+        const sql = 'SELECT * FROM device  WHERE device_type_id != 5 ORDER BY name ASC';
         const stmt = this._conn.prepare(sql);
         const result = stmt.all();
 

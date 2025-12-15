@@ -56,9 +56,6 @@ try {
     serviceRouter = require('./services/deviceType.js');
     app.use(TOPLEVELPATH, serviceRouter);
 
-    serviceRouter = require('./services/deviceType.js');
-    app.use(TOPLEVELPATH, serviceRouter);
-
     serviceRouter = require('./services/energy.js');
     app.use(TOPLEVELPATH, serviceRouter);
 

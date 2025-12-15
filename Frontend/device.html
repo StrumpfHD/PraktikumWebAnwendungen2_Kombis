@@ -339,7 +339,7 @@
             }
 
             // -----------------------------
-            // Add Device Modal öffnen
+            // Gerät hinzufügen Modal öffnen
             // -----------------------------
             $("#openAddDeviceBtn").on("click", function () {
                 loadRoomsForModal();
@@ -427,7 +427,6 @@
             $(document).on("click", ".edit-device-btn", function () {
                 currentEditDeviceId = $(this).data("id");
 
-                // 🔥 WICHTIG: Räume + Typen sicher laden, BEVOR das Modal befüllt wird
                 preloadData().then(() => {
                     $.ajax({
                         url: `http://localhost:8000/api/device/get/${currentEditDeviceId}`,
@@ -451,8 +450,6 @@
 
                         // Name setzen
                         $("#editDeviceName").val(device.name);
-
-                        // Modal öffnen
                         editDeviceModal.show();
                     });
                 });
@@ -470,7 +467,6 @@
 
                 const typeObj = deviceTypes.find(t => t.name === typeName);
 
-                // ⬇⬇⬇ WICHTIG: DEFAULT-WERT NEU SETZEN JE NACH TYP (Lösung C)
                 let newDefaultValue;
 
                 switch (typeName) {
@@ -496,7 +492,7 @@
                         room_id: roomId,
                         device_type_id: typeObj.device_type_id,
                         name: deviceName,
-                        value: newDefaultValue       //  ⬅⬅⬅ HIER IST LÖSUNG C
+                        value: newDefaultValue
                     })
                 }).done(() => {
                     showModalAlert('success', 'Änderungen gespeichert!', '#editDeviceModalAlert');
@@ -507,13 +503,8 @@
                     }, 1200);
                 });
             });
-            // -----------------------------
-            // Initial laden
-            // -----------------------------
             loadDevices();
         });
     </script>
-
 </body>
-
 </html>

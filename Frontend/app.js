@@ -39,7 +39,7 @@ try {
 
     // Dashboard.html laden
     app.get('/', (req, res) => {
-        res.sendFile(path.join(__dirname, 'Dashboard.html'));
+        res.sendFile(path.join(__dirname, 'dashboard.html'));
     });
 
     // 404
