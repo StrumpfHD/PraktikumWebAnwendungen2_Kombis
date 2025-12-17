@@ -25,20 +25,10 @@ serviceRouter.get('/energy/devices', (req, res) => {
  * Liefert Verbrauch, Ertrag und Bilanz des heutigen Tages.
  */
 serviceRouter.get('/energy/today', (req, res) => {
-   try {
-    const sql = `
-      WITH max_day AS (
-        SELECT date(MAX(timestamp)) AS d
-        FROM energy_data
-      )
-      SELECT
-        SUM(consumption) AS totalConsumption,
-        SUM(generation)  AS totalGeneration
-      FROM energy_data, max_day
-      WHERE date(timestamp) = max_day.d
-    `;
-    const stmt = req.app.locals.dbConnection.prepare(sql);
-    const row = stmt.get();
+  const dao = new EnergyDataDao(req.app.locals.dbConnection);
+
+  try {
+    const row = dao.loadLatestDaySummary();
 
     const consumption = row.totalConsumption || 0;
     const generation  = row.totalGeneration  || 0;
@@ -58,6 +48,7 @@ serviceRouter.get('/energy/today', (req, res) => {
     res.status(500).json({ error: true, message: ex.message });
   }
 });
+
 
 /**
  * GET /api/energy/summary/week

@@ -10,6 +10,26 @@ class EnergyDataDao {
     return this._conn;
   }
 
+    loadLatestDaySummary() {
+    const sql = `
+      WITH max_day AS (
+        SELECT date(MAX(timestamp)) AS d
+        FROM energy_data
+      )
+      SELECT
+        SUM(consumption) AS totalConsumption,
+        SUM(generation)  AS totalGeneration
+      FROM energy_data, max_day
+      WHERE date(timestamp) = max_day.d
+    `;
+    const stmt = this._conn.prepare(sql);
+    const result = stmt.get();
+
+    return result ?? { totalConsumption: 0, totalGeneration: 0 };
+  }
+
+
+
   loadDevicesWithEnergy() {
     const sql = `
         SELECT d.device_id, d.name
@@ -46,7 +66,6 @@ class EnergyDataDao {
     return helper.isArrayEmpty(result) ? [] : result;
   }
 
-  // 🔹 NEU: letzte 30 Tage
   loadSummaryLast30Days() {
     const sql = `
         WITH max_day AS (
