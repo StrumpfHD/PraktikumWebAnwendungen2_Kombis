@@ -25,13 +25,17 @@ serviceRouter.get('/energy/devices', (req, res) => {
  * Liefert Verbrauch, Ertrag und Bilanz des heutigen Tages.
  */
 serviceRouter.get('/energy/today', (req, res) => {
-  try {
+   try {
     const sql = `
+      WITH max_day AS (
+        SELECT date(MAX(timestamp)) AS d
+        FROM energy_data
+      )
       SELECT
         SUM(consumption) AS totalConsumption,
         SUM(generation)  AS totalGeneration
-      FROM energy_data
-      WHERE date(timestamp) = date('now')
+      FROM energy_data, max_day
+      WHERE date(timestamp) = max_day.d
     `;
     const stmt = req.app.locals.dbConnection.prepare(sql);
     const row = stmt.get();
