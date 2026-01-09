@@ -106,7 +106,7 @@
                         <div class="card-body">
 
                         <h3 class="card-title">
-                            <a href="roomlist.html" class="text-decoration-none text-dark">
+                            <a href="room.html?id=${room.room_id}" class="text-decoration-none text-dark">
                             ${room.name} (Status)
                             </a>
                         </h3>
@@ -135,6 +135,8 @@
 
                         </div>
                         <a href="roomlist.html" class="btn btn-primary">Anpassen</a>
+                        <a href="room.html?id=${room.room_id}" class="btn btn-primary">Raum anzeigen</a>
+
                     </div>
                     </div>
                 `);

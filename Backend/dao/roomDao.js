@@ -71,10 +71,11 @@ class RoomDao {
 
     loadDevicesForRoom(roomId) {
     const sql = `
-        SELECT *
-        FROM device
-        WHERE room_id = ?
-        ORDER BY name ASC
+        SELECT d.*, dt.name AS type_name, dt.unit
+        FROM device d
+        LEFT JOIN device_type dt ON d.device_type_id = dt.device_type_id
+        WHERE d.room_id = ?
+        ORDER BY d.name ASC
     `;
     const stmt = this._conn.prepare(sql);
     const result = stmt.all(roomId);

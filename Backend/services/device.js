@@ -69,6 +69,19 @@ serviceRouter.put('/device/edit/:id', (req, res) => {
     }
 });
 
+// Wert eines Geräts ändern
+serviceRouter.put('/device/value/:id', (req, res) => {
+    const deviceDao = new DeviceDao(req.app.locals.dbConnection);
+    try {
+        if (req.body.value === undefined) throw new Error('Neuer Wert fehlt');
+        const device = deviceDao.updateValue(req.params.id, req.body.value);
+        res.status(200).json(device);
+    } catch (ex) {
+        res.status(400).json({ fehler: true, nachricht: ex.message });
+    }
+});
+
+
 serviceRouter.delete('/device/delete/:id', (req, res) => {
     const deviceDao = new DeviceDao(req.app.locals.dbConnection);
     try {

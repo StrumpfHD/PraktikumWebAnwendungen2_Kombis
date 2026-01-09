@@ -72,6 +72,14 @@ class DeviceDao {
     toString() {
         console.log('deviceDao [_conn=' + this._conn + ']');
     }
+
+    updateValue(id, value) {
+    const sql = 'UPDATE device SET value = ? WHERE device_id = ?';
+    const stmt = this._conn.prepare(sql);
+    stmt.run(value, id);
+    return this.loadById(id); // aktualisiertes Gerät zurückgeben
+    }
+
 }
 
 module.exports = DeviceDao;
