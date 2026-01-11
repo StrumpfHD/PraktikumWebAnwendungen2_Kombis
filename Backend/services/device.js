@@ -35,7 +35,7 @@ serviceRouter.post('/device/new', (req, res) => {
         if (!req.body.name) throw new Error('Gerätename fehlt');
         if (!req.body.device_type_id) throw new Error('Gerätetyp fehlt');
         if (!req.body.room_id) throw new Error('Raumzuordnung fehlt');
-        if (!req.body.value) throw new Error('Gerätewert fehlt');
+        if (req.body.value === undefined || req.body.value === null) throw new Error('Gerätewert fehlt');
         const device = deviceDao.create(
             req.body.name,
             req.body.device_type_id,

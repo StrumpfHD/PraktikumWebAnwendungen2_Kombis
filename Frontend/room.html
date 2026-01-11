@@ -14,7 +14,8 @@
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <a class="navbar-brand" href="dashboard.html">
-                <img src="./pictures/logo.jpg" alt="Logo" width="50" height="50" class="d-inline-block align-text-center">
+                <img src="./pictures/logo.jpg" alt="Logo" width="50" height="50"
+                    class="d-inline-block align-text-center">
                 Mein Smart-Home Dashboard
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -40,6 +41,13 @@
         <!-- Geräte werden hier dynamisch geladen -->
     </div>
 
+    <div class="container">
+        <a id="addDeviceFromRoomBtn" class="btn btn-success mb-3">
+            <i class="bi bi-plus-circle"></i> Gerät hinzufügen
+        </a>
+    </div>
+
+
     <script>
         const TYPE = {
             STECKDOSE: 1,
@@ -51,6 +59,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get('id');
 
+        const addBtn = document.getElementById("addDeviceFromRoomBtn");
+        addBtn.href = `device.html?openAddModal=1&roomId=${roomId}`;
+
         const roomNameEl = document.getElementById('roomName');
         const roomContent = document.getElementById('roomContent');
 
@@ -61,8 +72,8 @@
         }
 
         function blindImgForPercent(pct) {
-            if (pct <= 5) return "./pictures/blinds_open.png";
-            if (pct >= 95) return "./pictures/blinds_closed.png";
+            if (pct <= 25) return "./pictures/blinds_open.png";
+            if (pct >= 75) return "./pictures/blinds_closed.png";
             return "./pictures/blinds_half.png";
         }
 
@@ -109,10 +120,19 @@
                     const div = document.createElement('div');
                     div.className = 'mb-2';
                     div.innerHTML = `
-                        <label>${b.name}: <output>${b.value}%</output></label>
-                        <input type="range" min="0" max="100" value="${b.value}" class="form-range">
-                        <img src="${blindImgForPercent(b.value)}" width="100px">
-                    `;
+                        <label>${b.name}:</label>
+                        <div class="text-center fw-bold mb-1">
+                            <output>${b.value}%</output>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="range" min="0" max="100" value="${b.value}" class="form-range flex-grow-1">
+                            <img src="${blindImgForPercent(b.value)}" width="50px">
+                        </div>
+                        <div class="d-flex justify-content-between text-muted small px-1 mt-1">
+                            <span>0% = offen</span>
+                            <span>100% = geschlossen</span>
+                        </div>
+                        `;
                     const range = div.querySelector('input[type=range]');
                     const output = div.querySelector('output');
                     range.addEventListener('input', (e) => {
@@ -137,40 +157,100 @@
                 const tempCard = document.createElement('div');
                 tempCard.className = 'card my-3 p-2';
                 tempCard.innerHTML = `
-                    <h5>Heizung:</h5>
-                    <div class="d-flex align-items-center">
-                        <button class="btn btn-secondary" id="minusTemp">-</button>
-                        <h2 id="tempDisplay" class="mx-2">${t.value.toFixed(1)}°C</h2>
-                        <button class="btn btn-secondary" id="plusTemp">+</button>
+                    <h5 class="mb-2">Heizung:
+                        <small class="text-muted fw-light ms-1">(Lange gedrückt halten für 1.0°C Schritte)</small>
+                    </h5>
+                    <div class="d-flex justify-content-center align-items-center mb-3">
+                        <button type="button" class="btn btn-sm btn-primary" id="minusTemp">
+                            <i class="bi bi-dash-circle"></i>
+                        </button>
+                        <h2 id="tempDisplay" class="mx-2">${Number(t.value).toFixed(1)}°C</h2>
+                        <button type="button" class="btn btn-sm btn-primary" id="plusTemp">
+                            <i class="bi bi-plus-circle"></i>
+                        </button>
                     </div>
                 `;
                 roomContent.appendChild(tempCard);
 
-                let temp = t.value;
+                let temp = Number(t.value);
+                const minTemp = 14.9;
+                const maxTemp = 28.0;
+
                 const tempDisplay = tempCard.querySelector('#tempDisplay');
+                const minusBtn = tempCard.querySelector('#minusTemp');
+                const plusBtn = tempCard.querySelector('#plusTemp');
+
+                let holdTimer = null;
+                let holdInterval = null;
+                let isHeld = false;
 
                 function updateTempDisplay() {
                     tempDisplay.textContent = temp.toFixed(1) + '°C';
                 }
 
-                tempCard.querySelector('#minusTemp').addEventListener('click', () => {
-                    temp -= 0.1;
-                    updateTempDisplay();
+                function sendTempToBackend() {
                     fetch(`http://localhost:8000/api/device/value/${t.device_id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ value: temp })
                     });
-                });
-                tempCard.querySelector('#plusTemp').addEventListener('click', () => {
-                    temp += 0.1;
-                    updateTempDisplay();
-                    fetch(`http://localhost:8000/api/device/value/${t.device_id}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ value: temp })
+                }
+
+                function increaseTemp(step = 0.1) {
+                    if (temp + step <= maxTemp) {
+                        temp += step;
+                        updateTempDisplay();
+                        sendTempToBackend();
+                    }
+                }
+
+                function decreaseTemp(step = 0.1) {
+                    if (temp - step >= minTemp) {
+                        temp -= step;
+                        updateTempDisplay();
+                        sendTempToBackend();
+                    }
+                }
+
+                function setupHold(button, changeFn) {
+                    button.addEventListener("mousedown", () => {
+                        isHeld = false;
+                        holdTimer = setTimeout(() => {
+                            isHeld = true;
+                            holdInterval = setInterval(() => changeFn(1.0), 200);
+                        }, 1000);
                     });
-                });
+
+                    button.addEventListener("mouseup", () => {
+                        clearTimeout(holdTimer);
+                        clearInterval(holdInterval);
+                        if (!isHeld) changeFn(0.1);
+                    });
+
+                    button.addEventListener("mouseleave", () => {
+                        clearTimeout(holdTimer);
+                        clearInterval(holdInterval);
+                    });
+
+                    // Touch Support
+                    button.addEventListener("touchstart", (e) => {
+                        e.preventDefault();
+                        isHeld = false;
+                        holdTimer = setTimeout(() => {
+                            isHeld = true;
+                            holdInterval = setInterval(() => changeFn(1.0), 200);
+                        }, 1000);
+                    });
+
+                    button.addEventListener("touchend", () => {
+                        clearTimeout(holdTimer);
+                        clearInterval(holdInterval);
+                        if (!isHeld) changeFn(0.1);
+                    });
+                }
+
+                setupHold(plusBtn, increaseTemp);
+                setupHold(minusBtn, decreaseTemp);
             }
 
             // Steckdosen

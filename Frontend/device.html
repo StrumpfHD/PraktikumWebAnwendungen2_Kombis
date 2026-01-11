@@ -215,6 +215,7 @@
 
             let editDeviceModal = new bootstrap.Modal(document.getElementById("editDeviceModal"));
             let currentEditDeviceId = null;
+            let currentDeviceValue = null; 
 
             let rooms = [];
             let deviceTypes = [];
@@ -266,7 +267,8 @@
                 switch (typeName) {
                     case "Licht":
                     case "Steckdose":
-                        return String(device.value).toLowerCase() === "on"
+                        const val = String(device.value).toLowerCase();
+                        return (val === "on" || val === "1")
                             ? "<span class='badge bg-success'>AN</span>"
                             : "<span class='badge bg-danger'>AUS</span>";
                     case "Heizung":
@@ -504,7 +506,29 @@
                 });
             });
             loadDevices();
+
+            // ------------------------------------
+            // Modal automatisch über URL öffnen
+            // ------------------------------------
+            const params = new URLSearchParams(window.location.search);
+            const openAddModal = params.get("openAddModal");
+            const preselectRoomId = params.get("roomId");
+
+            if (openAddModal === "1") {
+                preloadData().then(() => {
+                    loadRoomsForModal();
+
+                    if (preselectRoomId) {
+                        const select = $("#addDeviceRoom");
+                        select.val(preselectRoomId);
+                        select.trigger("change");
+                    }
+
+                    addDeviceModal.show();
+                });
+            }
         });
     </script>
 </body>
+
 </html>
